@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import {
   CAvatar,
@@ -53,6 +53,7 @@ import avatar6 from 'src/assets/images/avatars/6.jpg'
 
 import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
+import { useGetRobotStatus, useGetRobotStatusLastEntry } from 'src/api/api'
 
 const Dashboard = () => {
   const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
@@ -64,7 +65,23 @@ const Dashboard = () => {
     { title: 'New Users', value: '22.123 Users', percent: 80, color: 'danger' },
     { title: 'Bounce Rate', value: 'Average Rate', percent: 40.15, color: 'primary' },
   ]
+  const [robotEntries, setRobotEntries] = useState([])
+  const [last_entry, setlast_entry] = useState([])
 
+  useEffect(() => {
+    const getResults = async (id) => { 
+      const results = await Promise.all( [useGetRobotStatus(id),  useGetRobotStatusLastEntry(id)]);
+
+      
+      return results}
+    const result = getResults("12").then((response) => {
+      setRobotEntries(response[0].data)
+      setlast_entry([response[1].data])
+    });
+  }, [])
+  
+
+  
   const progressGroupExample1 = [
     { title: 'Monday', value1: 34, value2: 78 },
     { title: 'Tuesday', value1: 56, value2: 94 },
@@ -413,38 +430,23 @@ const Dashboard = () => {
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {tableExample.map((item, index) => (
+                  {last_entry.map((item, index) => (
                     <CTableRow v-for="item in tableItems" key={index}>
-                      <CTableDataCell className="text-center">
-                        <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
-                      </CTableDataCell>
+                
+                                           
                       <CTableDataCell>
-                        <div>{item.user.name}</div>
-                        <div className="small text-medium-emphasis">
-                          <span>{item.user.new ? 'New' : 'Recurring'}</span> | Registered:{' '}
-                          {item.user.registered}
-                        </div>
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        <CIcon size="xl" icon={item.country.flag} title={item.country.name} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div className="clearfix">
-                          <div className="float-start">
-                            <strong>{item.usage.value}%</strong>
-                          </div>
-                          <div className="float-end">
-                            <small className="text-medium-emphasis">{item.usage.period}</small>
-                          </div>
-                        </div>
-                        <CProgress thin color={item.usage.color} value={item.usage.value} />
+                       
+                        <CProgress thin color={item} value={item.current_item} />
                       </CTableDataCell>
                       {/* <CTableDataCell className="text-center">
                         <CIcon size="xl" icon={item.payment.icon} />
                       </CTableDataCell> */}
                       <CTableDataCell>
                         <div className="small text-medium-emphasis">Last login</div>
-                        <strong>{item.activity}</strong>
+                        <strong>{item.timestamp}</strong>
+                      </CTableDataCell>
+                      <CTableDataCell>
+                        <strong>{item.current_item+"/"+item.total_items}</strong>
                       </CTableDataCell>
                     </CTableRow>
                   ))}
