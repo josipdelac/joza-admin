@@ -42,6 +42,7 @@ import {
   cilPeople,
   cilUser,
   cilUserFemale,
+  moment,
 } from '@coreui/icons'
 
 import avatar1 from 'src/assets/images/avatars/1.jpg'
@@ -71,14 +72,34 @@ const Dashboard = () => {
   useEffect(() => {
     const getResults = async (id) => { 
       const results = await Promise.all( [useGetRobotStatus(id),  useGetRobotStatusLastEntry(id)]);
+     
+       return results }
 
-      
-      return results}
-    const result = getResults("12").then((response) => {
+    /*const result = getResults("ROO").then((response) => {
       setRobotEntries(response[0].data)
       setlast_entry([response[1].data])
-    });
+    });*/
+    const fetchData = async () => {
+      const response = await getResults("ROO");
+      setRobotEntries(response[0].data);
+      setlast_entry([response[1].data]);
+    };
+
+    fetchData();
+    const intervalId = setInterval(fetchData, 100);
+
+  // Clean up interval on component unmount
+  return () => {
+    clearInterval(intervalId);
+  };
+
+    
+  
+
   }, [])
+   
+ 
+
   
 
   
@@ -422,11 +443,12 @@ const Dashboard = () => {
                     <CTableHeaderCell className="text-center">
                       <CIcon icon={cilPeople} />
                     </CTableHeaderCell>
-                    <CTableHeaderCell>Robot</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Robot</CTableHeaderCell>
                     <CTableHeaderCell className="text-center">Satus</CTableHeaderCell>
-                    <CTableHeaderCell>Progress</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Progress</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Server</CTableHeaderCell>
                     {/* <CTableHeaderCell className="text-center">Payment Method</CTableHeaderCell> */}
-                    <CTableHeaderCell>Last updated</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Last updated</CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
@@ -436,17 +458,31 @@ const Dashboard = () => {
                                            
                       <CTableDataCell>
                        
-                        <CProgress thin color={item} value={item.current_item} />
+                        <CProgress  thin color={item} value={item.current_item*1.56} />
                       </CTableDataCell>
                       {/* <CTableDataCell className="text-center">
                         <CIcon size="xl" icon={item.payment.icon} />
                       </CTableDataCell> */}
-                      <CTableDataCell>
-                        <div className="small text-medium-emphasis">Last login</div>
-                        <strong>{item.timestamp}</strong>
+                      <CTableDataCell className="text-center">
+                        
+                        <strong >{item.name}</strong>
                       </CTableDataCell>
-                      <CTableDataCell>
+                      <CTableDataCell className="text-center">
+                        
+                        <strong>{item.status}</strong>
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center">
+                        {/* <div className="small text-medium-emphasis">Last login</div> */}
+                        
                         <strong>{item.current_item+"/"+item.total_items}</strong>
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center">
+                        
+                        <strong>{item.server_id}</strong>
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center">
+                                            
+                        <strong>{item.datum}</strong>
                       </CTableDataCell>
                     </CTableRow>
                   ))}

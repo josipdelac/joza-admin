@@ -14,7 +14,7 @@ def add_entry():
     entry = request.json
     print(entry)
     mycol = mydb[str(entry["id"])]
-    myentry = { "rpy_id": entry["id"], "name": entry["name"], "current_item": entry["current_item"],"total_items":entry["total_items"], "server_id":entry["server_id"], "timestamp":entry["timestamp"] }
+    myentry = { "rpy_id": entry["id"], "name": entry["name"], "current_item": entry["current_item"],"total_items":entry["total_items"], "server_id":entry["server_id"], "status":entry["status"], "timestamp":entry["timestamp"],"datum":entry["datum"] }
     x = mycol.insert_one(myentry)
         
     
