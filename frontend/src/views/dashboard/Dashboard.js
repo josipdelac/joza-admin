@@ -86,7 +86,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-    const intervalId = setInterval(fetchData, 100);
+    const intervalId = setInterval(fetchData, 10000);
 
   // Clean up interval on component unmount
   return () => {
@@ -458,7 +458,7 @@ const Dashboard = () => {
                                            
                       <CTableDataCell>
                        
-                        <CProgress  thin color={item} value={item.current_item*1.56} />
+                        <CProgress  thin color={item} value={item.current_item*1} />
                       </CTableDataCell>
                       {/* <CTableDataCell className="text-center">
                         <CIcon size="xl" icon={item.payment.icon} />
