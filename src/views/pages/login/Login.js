@@ -8,17 +8,9 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleLogin = async () => {
-    try {
-      console.log("EJ OD KAD SAM SE RODIO")
-      const response = await axios.post('http://localhost:5000/api/login', { username, password });
-
-      // Handle successful login here (e.g., set user data in state, manage sessions)
-      console.log('Login successful:', response.data);
-    } catch (error) {
-      setErrorMessage('Invalid credentials');
-      console.error('Login failed:', error);
-    }
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Ovdje dodajte logiku za prijavu
   };
 
   return (
@@ -40,17 +32,16 @@ const Login = () => {
           </CInputGroupText>
           <CFormInput
             type="password"
-            placeholder="Password"
+            placeholder="TESTTTTTT"
             autoComplete="current-password"
             onChange={(e) => setPassword(e.target.value)}
           />
         </CInputGroup>
-        {errorMessage && <div className="text-danger">{errorMessage}</div>}
         <CRow>
           <CCol xs={6}>
-            <Button  onClick={handleLogin}>
+            <button  onclick={() => {console.log("Pozvanp,,,,,"); handleLogin();}}>
               Login
-            </Button>
+            </button>
           </CCol>
         </CRow>
       </CForm>
