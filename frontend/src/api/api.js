@@ -1,10 +1,11 @@
 import axios from "axios"
 
-const API_URL= "http://127.0.0.1:8001/";
+const API_URL= "http://127.0.0.1:8001";
 
 
 export const useGetRobotStatus = async (id) => {
-    const result = await axios.get(`${API_URL}/entries/${id}`);
+    const result = await axios.get(`${API_URL}/entries/`);
+    console.log("ALL ENTRIES", result)
     return result;
 };
 

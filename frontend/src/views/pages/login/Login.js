@@ -1,4 +1,4 @@
-import React, {useState, useNavigate, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 import { Link } from 'react-router-dom'
 import {
   CButton,
@@ -16,11 +16,14 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 import axios from 'axios'
+import {useNavigate } from 'react-router-dom';
+
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [ipAddress, setIPAddress] = useState('');
+  const navigate = useNavigate();
  // const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -35,7 +38,7 @@ function Login() {
 
       if (response.data.message === 'Login successful') {
         alert(response.data.message);
-       // navigate('/dashboard'); // Preusmjeri korisnika na dashboard nakon prijave
+        navigate('/dashboard'); // Preusmjeri korisnika na dashboard nakon prijave
       } else {
         alert(response.data.message);
       }
