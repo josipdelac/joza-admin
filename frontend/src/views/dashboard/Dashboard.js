@@ -54,7 +54,7 @@ import avatar6 from 'src/assets/images/avatars/6.jpg'
 
 import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
-import { useGetRobotStatus, useGetRobotStatusLastEntry } from 'src/api/api'
+import { useGetRobotStatus, useGetRobotStatusLastEntry, useGetRobotsStatusLastEntries } from 'src/api/api'
 
 const Dashboard = () => {
   const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
@@ -71,7 +71,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const getResults = async (id) => { 
-      const results = await Promise.all( [useGetRobotStatus(id),  useGetRobotStatusLastEntry(id)]);
+      const results = await Promise.all( [useGetRobotsStatusLastEntries(),  useGetRobotStatusLastEntry(id)]);
      
        return results }
 
