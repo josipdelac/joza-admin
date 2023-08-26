@@ -9,6 +9,8 @@ import base64
 import xml.etree.ElementTree as ET
 import requests
 import concurrent
+from requests import get
+
 
 
 app = Flask(__name__)
@@ -124,12 +126,16 @@ def register():
 #Api za login
 @app.route('/api/login', methods=['POST'])
 @cross_origin(origins='http://localhost:3000', methods=['POST'])
-
 def login():
     data = request.get_json()
     email = data['email']
     password = data['password']
-
+    ipAddress=data['ipAddress']
+    ipMetadata= get_ip(ipAddress)
+    print("IPMETADATA",ipMetadata)
+    country= ipMetadata['country']
+    city= ipMetadata['city']
+    timezone= ipMetadata['timezone']
     # Dohvaćanje korisnika iz baze prema emailu
     cursor = db.cursor()
     query = "SELECT id, password, first_name, last_name FROM users WHERE email = %s"
@@ -138,6 +144,7 @@ def login():
     
 
     if user_data:
+        user_id=user_data[0]
         stored_password = user_data[1]
         first_name = user_data[2]
         last_name = user_data[3]
@@ -158,7 +165,12 @@ def login():
             
             print(hashed_combined_password+"----"+stored_password)
             if sha256_crypt.verify(combined_password, stored_password):
-                print("pogodak")
+                print("pogodak"+city+timezone+country+ipAddress)
+                
+                query = "INSERT INTO transaction (userid, coutry, city, ip, timezone) VALUES (%s, %s, %s, %s, %s)"
+                cursor.execute(query, (user_id, country, city, ipAddress, timezone))
+                db.commit()
+                
                 return jsonify({'message': 'Login successful'})
                 
             
@@ -168,7 +180,7 @@ def login():
     cursor.close()
 
 def find_match(salt,password,pepper, stored_password):
-    salt = char
+    
     combined_password = password + salt + pepper
     print(pepper)
     hashed_combined_password = sha256_crypt.hash(combined_password)
@@ -178,6 +190,14 @@ def find_match(salt,password,pepper, stored_password):
     if sha256_crypt.verify(combined_password, stored_password):
         print("pogodak")
         return jsonify({'message': 'Login successful'})
+
+def get_ip(ip):
+    from requests import get
+    meta = get("http://ip-api.com/json/"+ip).json()
+    print (meta)
+    return meta
+
+    
     
 
 if __name__ == '__main__':

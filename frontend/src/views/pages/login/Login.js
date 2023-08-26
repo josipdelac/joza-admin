@@ -1,4 +1,4 @@
-import React, {useState, useNavigate} from 'react'
+import React, {useState, useNavigate, useEffect} from 'react'
 import { Link } from 'react-router-dom'
 import {
   CButton,
@@ -20,6 +20,7 @@ import axios from 'axios'
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [ipAddress, setIPAddress] = useState('');
  // const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -27,6 +28,7 @@ function Login() {
       const data = {
         email,
         password,
+        ipAddress,
       };
 
       const response = await axios.post('http://localhost:5000/api/login', data);
@@ -41,6 +43,19 @@ function Login() {
       console.error('Error:', error);
     }
   };
+
+  
+    
+  
+    useEffect(() => {
+      fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => setIPAddress(data.ip))
+        .catch(error => console.log(error))
+    }, []);
+  
+
+  
 
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
@@ -91,9 +106,12 @@ function Login() {
                   <div>
                     <h2>Sign up</h2>
                     <p>
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                      tempor incididunt ut labore et dolore magna aliqua.
+                    Embark on your journey with us! 🌟 Create an account today and join our vibrant community. 
+                    Let's unlock a world of possibilities together. Click here to register and be a part of something extraordinary.
                     </p>
+                    <div>
+                      <h1>Your IP Address is: {ipAddress}</h1>
+                    </div>
                     <Link to="/register">
                       <CButton color="primary" className="mt-3" active tabIndex={-1}>
                         Register Now!

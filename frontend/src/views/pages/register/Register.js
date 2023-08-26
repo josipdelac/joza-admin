@@ -152,15 +152,6 @@ const Register = () => {
                     />
                   </CInputGroup>
                   <CInputGroup className="mb-4">
-                    <CInputGroupText>
-                      <CIcon icon={cilLockLocked} />
-                    </CInputGroupText>
-                    <CFormInput
-                      type="password"
-                      placeholder="Repeat Password"
-                    />
-                  </CInputGroup>
-                  <CInputGroup className="tab-pane fade active show p-3 preview">
                     <CInputGroupText>🌍</CInputGroupText>
                     <CFormSelect
                     aria-label="Country"
