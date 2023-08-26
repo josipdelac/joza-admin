@@ -102,7 +102,7 @@ const Dashboard = () => {
 
   
 
-  
+  /*
   const progressGroupExample1 = [
     { title: 'Monday', value1: 34, value2: 78 },
     { title: 'Tuesday', value1: 56, value2: 94 },
@@ -351,27 +351,27 @@ const Dashboard = () => {
       <CRow>
         <CCol xs>
           <CCard className="mb-4">
-            <CCardHeader>Traffic {' & '} Sales</CCardHeader>
+            <CCardHeader>Tottal statistic</CCardHeader>
             <CCardBody>
               <CRow>
                 <CCol xs={12} md={6} xl={6}>
                   <CRow>
                     <CCol sm={6}>
                       <div className="border-start border-start-4 border-start-info py-1 px-3">
-                        <div className="text-medium-emphasis small">New Clients</div>
+                        <div className="text-medium-emphasis small">Total documents processed</div>
                         <div className="fs-5 fw-semibold">9,123</div>
                       </div>
                     </CCol>
                     <CCol sm={6}>
                       <div className="border-start border-start-4 border-start-danger py-1 px-3 mb-3">
-                        <div className="text-medium-emphasis small">Recurring Clients</div>
+                        <div className="text-medium-emphasis small">Total K+ insert processed</div>
                         <div className="fs-5 fw-semibold">22,643</div>
                       </div>
                     </CCol>
                   </CRow>
 
                   <hr className="mt-0" />
-                  {progressGroupExample1.map((item, index) => (
+                  {/*progressGroupExample1.map((item, index) => (
                     <div className="progress-group mb-4" key={index}>
                       <div className="progress-group-prepend">
                         <span className="text-medium-emphasis small">{item.title}</span>
@@ -381,14 +381,14 @@ const Dashboard = () => {
                         <CProgress thin color="danger" value={item.value2} />
                       </div>
                     </div>
-                  ))}
+                  ))*/}
                 </CCol>
 
                 <CCol xs={12} md={6} xl={6}>
                   <CRow>
                     <CCol sm={6}>
                       <div className="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
-                        <div className="text-medium-emphasis small">Pageviews</div>
+                        <div className="text-medium-emphasis small">Total WEB data processed</div>
                         <div className="fs-5 fw-semibold">78,623</div>
                       </div>
                     </CCol>
@@ -402,7 +402,7 @@ const Dashboard = () => {
 
                   <hr className="mt-0" />
 
-                  {progressGroupExample2.map((item, index) => (
+                  {/*progressGroupExample2.map((item, index) => (
                     <div className="progress-group mb-4" key={index}>
                       <div className="progress-group-header">
                         <CIcon className="me-2" icon={item.icon} size="lg" />
@@ -413,7 +413,7 @@ const Dashboard = () => {
                         <CProgress thin color="warning" value={item.value} />
                       </div>
                     </div>
-                  ))}
+                  ))*/}
 
                   <div className="mb-5"></div>
 
@@ -452,7 +452,7 @@ const Dashboard = () => {
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {last_entry.map((item, index) => (
+                  {robotEntries.map((item, index) => (
                     <CTableRow v-for="item in tableItems" key={index}>
                 
                                            
