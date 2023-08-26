@@ -97,8 +97,11 @@ const Dashboard = () => {
     console.log("JSPDF")
     const doc = new jsPDF();
     doc.text("Report!", 10, 10);
-    for (x in robotEntries){
-      doc.text(str(x), 10, 10);}
+    console.log("X:::",robotEntries)
+    robotEntries?.forEach((value,index) => doc.text(JSON.stringify(value), 10, 20+10*index))
+    // for (const x in robotEntries){
+    //   console.log("X:::",x)
+    //   doc.text(str(x), 10, 10);}
     doc.save("report.pdf");
   }
   const handleRTF= ()=>{
@@ -115,9 +118,14 @@ const Dashboard = () => {
 
     // Adding text styled with formatter
     myDoc.writeText('Report.', textFormat);
-    for (x in robotEntries){
-      doc.text(str(x), 10, 10);}
+    console.log("X:::",robotEntries)
+    robotEntries?.forEach((value) => myDoc.writeText(JSON.stringify(value)))
 
+//     for ( x in robotEntr{
+//       console.log("X:::",x)
+
+//       doc.text(str(x), 10, 10);}
+// ies)
     // Make content...
     var content = myDoc.createDocument();
     var blob = new Blob([content], {type: "text/plain;charset=utf-8"});
