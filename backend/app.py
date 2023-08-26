@@ -141,7 +141,7 @@ def login():
     query = "SELECT id, password, first_name, last_name FROM users WHERE email = %s"
     cursor.execute(query, (email,))
     user_data = cursor.fetchone()
-    
+    print("TUUUUU")
 
     if user_data:
         user_id=user_data[0]

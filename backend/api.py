@@ -13,20 +13,24 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-@app.route('/entries/<robot_id>', methods=['GET'])
+@app.route('/entries/', methods=['GET'])
 @cross_origin()
-def get_entries(robot_id):
-    mycol = mydb[str(robot_id)]
-    x = mycol.find({})
-    temp= []
-    for a in x:
-        print(a)
-        del a["_id"]
-        temp.append(a)
-        
+def get_entries():
+    all_collections= mydb.list_collection_names()
+    result= []
+    for collection in all_collections:
+        x= mydb[collection].find({})
+        temp= []
+        for a in x:
+            print(a)
+            del a["_id"]
+            temp.append(a)
+        if(len(temp)>0):
+            result.append(temp[-1])
+        # elif(len(temp)):
+        #     result.append(temp[0])
     
-    
-    return temp
+    return result
 
 @app.route('/last_entry/<robot_id>', methods=['GET'])
 @cross_origin()
