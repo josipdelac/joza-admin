@@ -5,9 +5,9 @@
 - [ ] INI/windows registar postavke
 - [ ] XML/JSON spremanje obrada podataka
 - [ ] Custom binarna datoteka
-- [ ] jos jedna tablica u bazi
+- [x] jos jedna tablica u bazi
 - [ ] sortiranje filtriranje iz baze
-- [ ] Izvjestaj u RTF i PDF
+- [x] Izvjestaj u RTF i PDF
 - [ ] Dretve
 - [ ] TCP/UDP test
 - [ ] AES i RSA

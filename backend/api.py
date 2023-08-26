@@ -13,7 +13,21 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-@app.route('/entries/', methods=['GET'])
+@app.route('/all_entries/', methods=['GET'])
+@cross_origin()
+def get_all_entries():
+    all_collections= mydb.list_collection_names()
+    result= []
+    for collection in all_collections:
+        x= mydb[collection].find({})
+        for a in x:
+            print(a)
+            del a["_id"]
+            result.append(a)
+    
+    return result
+
+@app.route('/last_entries/', methods=['GET'])
 @cross_origin()
 def get_entries():
     all_collections= mydb.list_collection_names()

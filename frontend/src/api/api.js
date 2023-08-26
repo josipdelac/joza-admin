@@ -13,3 +13,8 @@ export const useGetRobotStatusLastEntry = async (id) => {
     const result = await axios.get(`${API_URL}/last_entry/${id}`);
     return result;
 };
+
+export const useGetRobotsStatusLastEntries = async () => {
+    const result = await axios.get(`${API_URL}/last_entries/`);
+    return result;
+};
