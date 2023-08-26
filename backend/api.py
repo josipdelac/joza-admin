@@ -22,7 +22,7 @@ def get_entries():
         x= mydb[collection].find({})
         temp= []
         for a in x:
-            print(a)
+          #  print(a)
             del a["_id"]
             temp.append(a)
         if(len(temp)>0):
@@ -37,12 +37,42 @@ def get_entries():
 def get_last_entry(robot_id):
     mycol = mydb[str(robot_id)]
     x = mycol.find().sort([('timestamp', -1)]).limit(1)    
-    print(x)
+    #print(x)
     for a in x:
-        print(a)
+       # print(a)
         del a["_id"]
         return a
-    return "JBG" 
+    return "JBG"
+
+@app.route('/sum_total_items/', methods=['GET'])
+@cross_origin()
+def sum_total_items():
+    pipeline = [
+        {
+            "$match": {
+                "current_item": {"$eq": "total_items"},
+                "type": {"$regex": "pdf", "$options": "i"}
+            }
+        },
+        {
+            "$group": {
+                "_id": None,
+                "total": {"$sum": {"$toInt": "$total_items"}}
+            }
+        }
+    ]
+    
+    try:
+        result = list(mydb.aggregate(pipeline))
+        if result:
+            total_sum = result[0]["total"]
+            print(total_sum)
+            print("nije nista")
+            return jsonify({"sum_total_items": total_sum})
+        else:
+            return "No matching documents found."
+    except Exception as e:
+        return str(e) 
     
 if __name__ == '__main__':
     app.run(debug=True, port=8001)
