@@ -14,6 +14,11 @@ export const useGetRobotStatusLastEntry = async (id) => {
     return result;
 };
 
+export const useGetProcessedItems = async (type) => {
+    const result = await axios.get(`${API_URL}/sum_total_items/${type}`);
+    return result;
+};
+
 export const useGetRobotsStatusLastEntries = async () => {
     const result = await axios.get(`${API_URL}/last_entries/`);
     return result;

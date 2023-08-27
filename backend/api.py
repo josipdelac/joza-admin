@@ -58,16 +58,16 @@ def get_last_entry(robot_id):
         return a
     return "JBG"
 
-@app.route('/sum_total_items/', methods=['GET'])
+@app.route('/sum_total_items/<type>', methods=['GET'])
 @cross_origin()
-def sum_total_items():
+def sum_total_items(type):
     pipeline = [
         {
             "$match": {
         "$expr": {
             "$eq": ["$current_item", "$total_items"]
         },
-        "type": {"$regex": "pdf", "$options": "i"}  
+        "type": {"$regex": type, "$options": "i"}  
     }
         },
         {
@@ -88,7 +88,10 @@ def sum_total_items():
                 print(z)
                 result.append(z)
         print((result))
-        return result
+        result_sum= 0
+        for x in result:
+            result_sum+= int(x["total"])
+        return str(result_sum)
         # result = list(mydb.aggregate(pipeline))
         # if result:
         #     total_sum = result[0]["total"]

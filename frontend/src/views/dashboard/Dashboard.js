@@ -46,7 +46,7 @@ import {
 } from '@coreui/icons'
 
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
-import { useGetRobotStatus, useGetRobotStatusLastEntry, useGetRobotsStatusLastEntries } from 'src/api/api'
+import { useGetRobotStatus, useGetRobotStatusLastEntry, useGetRobotsStatusLastEntries, useGetProcessedItems } from 'src/api/api'
 import { jsPDF } from "jspdf";
 var jsRTF = require('jsrtf');
 import { saveAs } from 'file-saver';
@@ -63,10 +63,11 @@ const Dashboard = () => {
   ]
   const [robotEntries, setRobotEntries] = useState([])
   const [last_entry, setlast_entry] = useState([])
+  const [total_processed, setTotalProcessed] = useState({pdf: 0, web:0})
 
   useEffect(() => {
     const getResults = async (id) => { 
-      const results = await Promise.all( [useGetRobotsStatusLastEntries(),  useGetRobotStatusLastEntry(id)]);
+      const results = await Promise.all( [useGetRobotsStatusLastEntries(),  useGetRobotStatusLastEntry(id),useGetProcessedItems("pdf"),useGetProcessedItems("web")]);
      
        return results }
 
@@ -78,6 +79,7 @@ const Dashboard = () => {
       const response = await getResults("ROO");
       setRobotEntries(response[0].data);
       setlast_entry([response[1].data]);
+      setTotalProcessed({pdf: response[2].data, web:response[3].data})
     };
 
     fetchData();
@@ -277,13 +279,13 @@ const Dashboard = () => {
                     <CCol sm={6}>
                       <div className="border-start border-start-4 border-start-info py-1 px-3">
                         <div className="text-medium-emphasis small">Total documents processed</div>
-                        <div className="fs-5 fw-semibold">9,123</div>
+                        <div className="fs-5 fw-semibold">{total_processed.pdf}</div>
                       </div>
                     </CCol>
                     <CCol sm={6}>
                       <div className="border-start border-start-4 border-start-danger py-1 px-3 mb-3">
                         <div className="text-medium-emphasis small">Total K+ insert processed</div>
-                        <div className="fs-5 fw-semibold">22,643</div>
+                        <div className="fs-5 fw-semibold">{total_processed.web}</div>
                       </div>
                     </CCol>
                   </CRow>
