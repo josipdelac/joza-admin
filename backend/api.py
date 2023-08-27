@@ -64,9 +64,11 @@ def sum_total_items():
     pipeline = [
         {
             "$match": {
-                "current_item": {"$eq": "total_items"},
-                "type": {"$regex": "pdf", "$options": "i"}
-            }
+        "$expr": {
+            "$eq": ["$current_item", "$total_items"]
+        },
+        "type": {"$regex": "pdf", "$options": "i"}  
+    }
         },
         {
             "$group": {
@@ -77,14 +79,24 @@ def sum_total_items():
     ]
     
     try:
-        result = list(mydb.aggregate(pipeline))
-        if result:
-            total_sum = result[0]["total"]
-            print(total_sum)
-            print("nije nista")
-            return jsonify({"sum_total_items": total_sum})
-        else:
-            return "No matching documents found."
+        result=[]
+        all_collections= mydb.list_collection_names()
+        for x in all_collections:
+            mycol = mydb[str(x)]
+            agr_result= mycol.aggregate(pipeline)
+            for z in agr_result:
+                print(z)
+                result.append(z)
+        print((result))
+        return result
+        # result = list(mydb.aggregate(pipeline))
+        # if result:
+        #     total_sum = result[0]["total"]
+        #     print(total_sum)
+        #     print("nije nista")
+        #     return jsonify({"sum_total_items": total_sum})
+        # else:
+        #     return "No matching documents found."
     except Exception as e:
         return str(e) 
     
