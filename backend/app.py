@@ -136,7 +136,7 @@ def hash_password(password, salt, pepper):
 def verify_password(combined_password, stored_password):
     return sha256_crypt.verify(combined_password, stored_password)
 
-def process_login(email, password, ipAddress, ipMetadata, cursor, db, salt_string):
+def process_login(email, password, ipAddress, ipMetadata, cursor, salt_string):
     country = ipMetadata['country']
     city = ipMetadata['city']
     timezone = ipMetadata['timezone']
@@ -186,7 +186,7 @@ def login_route():
     salts= ['abcčćdđ','efghijk','lmnopqrs','štuvwxyzž']
     results= []
     for salt in salts:
-        results.append(executor.submit(process_login,email, password, ipAddress, ipMetadata, cursor, db, salt))
+        results.append(executor.submit(process_login,email, password, ipAddress, ipMetadata, cursor, salt))
     cursor = db.cursor()
     for x in results:
         if(x):
