@@ -126,7 +126,7 @@ def register():
         return jsonify({'message': 'Error registering user'}), 500
     
 
-executor = ThreadPoolExecutor()
+
 
 def hash_password(password, salt, pepper):
     combined_password = password + salt + pepper
@@ -136,10 +136,12 @@ def hash_password(password, salt, pepper):
 def verify_password(combined_password, stored_password):
     return sha256_crypt.verify(combined_password, stored_password)
 
-def process_login(email, password, ipAddress, ipMetadata, cursor, db):
-    country = ipMetadata['country']
-    city = ipMetadata['city']
-    timezone = ipMetadata['timezone']
+def process_login(email, password, ipAddress,  cursor, db):
+    
+
+    #country = ipMetadata['country']
+    #city = ipMetadata['city']
+    #timezone = ipMetadata['timezone']
 
    # Dohvaćanje korisnika iz baze prema emailu
     cursor = db.cursor()
@@ -163,32 +165,48 @@ def process_login(email, password, ipAddress, ipMetadata, cursor, db):
 
             
             if verify_password(combined_password, stored_password):
-                print("pogodak"+city+timezone+country+ipAddress)
+                print("pogodak"+ipAddress)
 
                 query = "INSERT INTO transaction (userid, coutry, city, ip, timezone) VALUES (%s, %s, %s, %s, %s)"
-                cursor.execute(query, (user_id, country, city, ipAddress, timezone))
+                #cursor.execute(query, (user_id, country, city, ipAddress, timezone))
+                cursor.execute(query, (user_id,  ipAddress))
                 db.commit()
                 cursor.close()
                 return {'message': 'Login successful'}
                 
     return {'message': 'User not found'}, 404
-    
+
+
 
 #Api za login
 @app.route('/api/login', methods=['POST'])
 @cross_origin(origins='http://localhost:3000', methods=['POST'])
 def login_route():
+    executor = ThreadPoolExecutor(max_workers=10)
+    #tasks = []
+    
     data = request.get_json()
     email = data['email']
     password = data['password']
     ipAddress = data['ipAddress']
     ipMetadata = get_ip(ipAddress)
-    
     cursor = db.cursor()
-    task = executor.submit(process_login, email, password, ipAddress, ipMetadata, cursor, db)
-    result = task.result()
-    return jsonify(result)
+
     
+    
+       
+    # Lista argumenta za process_login() funkciju
+    login_args_list = [(email, password, ipAddress, cursor, db) for _ in range(10)]
+
+
+     # Pokretanje paralelnih asinkronih poziva koristeći .map()
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        results = executor.map(process_login, *zip(*login_args_list))
+
+    # Prikupljanje rezultata
+    result_list = list(results)
+
+    return jsonify(result_list)
    
 
 
