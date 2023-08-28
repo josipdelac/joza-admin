@@ -136,7 +136,7 @@ def hash_password(password, salt, pepper):
 def verify_password(combined_password, stored_password):
     return sha256_crypt.verify(combined_password, stored_password)
 
-def process_login(email, password, ipAddress, ipMetadata, cursor, db):
+def process_login(email, password, ipAddress, ipMetadata, cursor, db, salt):
     country = ipMetadata['country']
     city = ipMetadata['city']
     timezone = ipMetadata['timezone']
@@ -171,7 +171,7 @@ def process_login(email, password, ipAddress, ipMetadata, cursor, db):
                 cursor.close()
                 return {'message': 'Login successful'}
                 
-    return {'message': 'User not found'}, 404
+    return
     
 
 #Api za login
@@ -183,11 +183,15 @@ def login_route():
     password = data['password']
     ipAddress = data['ipAddress']
     ipMetadata = get_ip(ipAddress)
-    
+    salts= ['abcčćdđ','efghijk','lmnopqrs','štuvwxyzž']
+    results= []
+    for salt in salts:
+        results.append(executor.submit(process_login,email, password, ipAddress, ipMetadata, cursor, db, salt))
     cursor = db.cursor()
-    task = executor.submit(process_login, email, password, ipAddress, ipMetadata, cursor, db)
-    result = task.result()
-    return jsonify(result)
+    for x in results:
+        if(x):
+            return jsonify(x)
+    return {'message': 'Login failed'}, 403
     
    
 
