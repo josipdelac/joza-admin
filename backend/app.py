@@ -10,6 +10,8 @@ import xml.etree.ElementTree as ET
 import requests
 import concurrent
 from requests import get
+from concurrent.futures import ThreadPoolExecutor
+
 
 
 
@@ -122,21 +124,24 @@ def register():
         traceback.print_exc()  # Ispis detalja greške
 
         return jsonify({'message': 'Error registering user'}), 500
+    
 
-#Api za login
-@app.route('/api/login', methods=['POST'])
-@cross_origin(origins='http://localhost:3000', methods=['POST'])
-def login():
-    data = request.get_json()
-    email = data['email']
-    password = data['password']
-    ipAddress=data['ipAddress']
-    ipMetadata= get_ip(ipAddress)
-    print("IPMETADATA",ipMetadata)
-    country= ipMetadata['country']
-    city= ipMetadata['city']
-    timezone= ipMetadata['timezone']
-    # Dohvaćanje korisnika iz baze prema emailu
+executor = ThreadPoolExecutor()
+
+def hash_password(password, salt, pepper):
+    combined_password = password + salt + pepper
+    #hashed_combined_password = sha256_crypt.hash(combined_password)
+    return combined_password
+
+def verify_password(combined_password, stored_password):
+    return sha256_crypt.verify(combined_password, stored_password)
+
+def process_login(email, password, ipAddress, ipMetadata, cursor, db):
+    country = ipMetadata['country']
+    city = ipMetadata['city']
+    timezone = ipMetadata['timezone']
+
+   # Dohvaćanje korisnika iz baze prema emailu
     cursor = db.cursor()
     query = "SELECT id, password, first_name, last_name FROM users WHERE email = %s"
     cursor.execute(query, (email,))
@@ -144,52 +149,49 @@ def login():
     print("TUUUUU   ")
 
     if user_data:
-        user_id=user_data[0]
+        user_id = user_data[0]
         stored_password = user_data[1]
         first_name = user_data[2]
         last_name = user_data[3]
-        pepper = generate_pepper(first_name, last_name, email)  # Generiraj "papar" kao kod registracije
-        ##Threads
-        # with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-        #     for index in range(8):
-        #         for char in 'abcčćdđefghijklmnopqrsštuvwxyzž':
-        #             executor.submit(find_match(char,password,pepper,stored_password), )
-
-        # Pokušaj različite soli dok se ne pronađe točna kombinacija lozinke
+        pepper = generate_pepper(first_name, last_name, email)
+        
         for char in 'abcčćdđefghijklmnopqrsštuvwxyzž':
             salt = char
             combined_password = password + salt + pepper
-            print(pepper)
-            hashed_combined_password = sha256_crypt.hash(combined_password)
-            print ("Password je "+password+" Sol je "+salt+" Biber je "+pepper+" hesirana je: "+hashed_combined_password)
+            #hashed_combined_password = hash_password(combined_password)
+            print ("Password je "+password+" Sol je "+salt+" Biber je "+pepper+" hesirana je: ")
+
             
-            print(hashed_combined_password+"----"+stored_password)
-            if sha256_crypt.verify(combined_password, stored_password):
+            if verify_password(combined_password, stored_password):
                 print("pogodak"+city+timezone+country+ipAddress)
-                
+
                 query = "INSERT INTO transaction (userid, coutry, city, ip, timezone) VALUES (%s, %s, %s, %s, %s)"
                 cursor.execute(query, (user_id, country, city, ipAddress, timezone))
                 db.commit()
+                cursor.close()
+                return {'message': 'Login successful'}
                 
-                return jsonify({'message': 'Login successful'})
-                
-            
-    else:
-        return jsonify({'message': 'User not found'}), 404
+    return {'message': 'User not found'}, 404
     
-    cursor.close()
 
-def find_match(salt,password,pepper, stored_password):
+#Api za login
+@app.route('/api/login', methods=['POST'])
+@cross_origin(origins='http://localhost:3000', methods=['POST'])
+def login_route():
+    data = request.get_json()
+    email = data['email']
+    password = data['password']
+    ipAddress = data['ipAddress']
+    ipMetadata = get_ip(ipAddress)
     
-    combined_password = password + salt + pepper
-    print(pepper)
-    hashed_combined_password = sha256_crypt.hash(combined_password)
-    print ("Password je "+password+" Sol je "+salt+" Biber je "+pepper+" hesirana je: "+hashed_combined_password)
+    cursor = db.cursor()
+    task = executor.submit(process_login, email, password, ipAddress, ipMetadata, cursor, db)
+    result = task.result()
+    return jsonify(result)
     
-    print(hashed_combined_password+"----"+stored_password)
-    if sha256_crypt.verify(combined_password, stored_password):
-        print("pogodak")
-        return jsonify({'message': 'Login successful'})
+   
+
+
 
 def get_ip(ip):
     from requests import get
