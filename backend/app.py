@@ -155,7 +155,7 @@ def process_login(email, password, ipAddress, ipMetadata, cursor, db, salt):
         last_name = user_data[3]
         pepper = generate_pepper(first_name, last_name, email)
         
-        for char in 'abcčćdđefghijklmnopqrsštuvwxyzž':
+        for char in salt:
             salt = char
             combined_password = password + salt + pepper
             #hashed_combined_password = hash_password(combined_password)
