@@ -136,7 +136,7 @@ def hash_password(password, salt, pepper):
 def verify_password(combined_password, stored_password):
     return sha256_crypt.verify(combined_password, stored_password)
 
-def process_login(email, password, ipAddress, ipMetadata, cursor, db, salt):
+def process_login(email, password, ipAddress, ipMetadata, cursor, db, salt_string):
     country = ipMetadata['country']
     city = ipMetadata['city']
     timezone = ipMetadata['timezone']
@@ -155,7 +155,7 @@ def process_login(email, password, ipAddress, ipMetadata, cursor, db, salt):
         last_name = user_data[3]
         pepper = generate_pepper(first_name, last_name, email)
         
-        for char in salt:
+        for char in salt_string:
             salt = char
             combined_password = password + salt + pepper
             #hashed_combined_password = hash_password(combined_password)
