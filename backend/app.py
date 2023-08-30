@@ -11,7 +11,9 @@ import requests
 import concurrent
 from requests import get
 from concurrent.futures import ThreadPoolExecutor
-
+import json
+import concurrent.futures
+import subprocess
 
 
 
@@ -126,7 +128,7 @@ def register():
         return jsonify({'message': 'Error registering user'}), 500
     
 
-executor = ThreadPoolExecutor()
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 
 def hash_password(password, salt, pepper):
     combined_password = password + salt + pepper
@@ -136,63 +138,63 @@ def hash_password(password, salt, pepper):
 def verify_password(combined_password, stored_password):
     return sha256_crypt.verify(combined_password, stored_password)
 
-def process_login(email, password, ipAddress, ipMetadata, cursor, salt_string):
+def process_login(email, password, ipAddress, ipMetadata, cursor, *args, **kwargs):
+    salt_string = kwargs['salt_string']
+
     country = ipMetadata['country']
     city = ipMetadata['city']
     timezone = ipMetadata['timezone']
 
-   # Dohvaćanje korisnika iz baze prema emailu
-    cursor = db.cursor()
+    # Dohvaćanje korisnika iz baze prema emailu
     query = "SELECT id, password, first_name, last_name FROM users WHERE email = %s"
     cursor.execute(query, (email,))
     user_data = cursor.fetchone()
-    print("TUUUUU   ")
 
     if user_data:
+        
         user_id = user_data[0]
         stored_password = user_data[1]
         first_name = user_data[2]
         last_name = user_data[3]
         pepper = generate_pepper(first_name, last_name, email)
-        
+
         for char in salt_string:
             salt = char
             combined_password = password + salt + pepper
             #hashed_combined_password = hash_password(combined_password)
             print ("Password je "+password+" Sol je "+salt+" Biber je "+pepper+" hesirana je: ")
 
-            
             if verify_password(combined_password, stored_password):
                 print("pogodak"+city+timezone+country+ipAddress)
 
                 query = "INSERT INTO transaction (userid, coutry, city, ip, timezone) VALUES (%s, %s, %s, %s, %s)"
                 cursor.execute(query, (user_id, country, city, ipAddress, timezone))
                 db.commit()
-                cursor.close()
-                return {'message': 'Login successful'}
-                
-    return
+                db.commit()
+                return True
+
+
+    return False
     
 
 #Api za login
 @app.route('/api/login', methods=['POST'])
 @cross_origin(origins='http://localhost:3000', methods=['POST'])
 def login_route():
+    cursor = db.cursor()
+
     data = request.get_json()
     email = data['email']
     password = data['password']
     ipAddress = data['ipAddress']
     ipMetadata = get_ip(ipAddress)
     salts= ['abcčćdđ','efghijk','lmnopqrs','štuvwxyzž']
-    results= []
+    results = []
     for salt in salts:
-        results.append(executor.submit(process_login,email, password, ipAddress, ipMetadata, cursor, salt))
-    cursor = db.cursor()
-    for x in results:
-        if(x):
-            return jsonify(x)
-    return {'message': 'Login failed'}, 403
-    
+        results.append(executor.submit(process_login,email, password, ipAddress, ipMetadata, cursor, salt_string=salt))
+
+    return jsonify(list(map(lambda result: result.result(), results)))
+
    
 
 
@@ -203,7 +205,23 @@ def get_ip(ip):
     print (meta)
     return meta
 
-    
+
+
+
+
+@app.route('/api/tablice', methods=['POST'])
+@cross_origin(origins='http://localhost:3000', methods=['POST'])
+def run_process_b():
+    data = request.get_json()
+    excel_izlazna_putanja = data.get('excel_izlazna_putanja')
+    pdf_direktorijum = data.get('pdf_direktorijum')
+    print("TUUU SAAM")
+
+    try:
+        subprocess.run(['python', 'tablica.py', excel_izlazna_putanja, pdf_direktorijum], check=True)
+        return jsonify({'message': 'Proces B je uspješno izvršen.'})
+    except subprocess.CalledProcessError as e:
+        return jsonify({'error': f'Greška prilikom izvršavanja Procesa B: {e}'})    
     
 
 if __name__ == '__main__':
