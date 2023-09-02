@@ -36,7 +36,7 @@ function Login() {
 
       const response = await axios.post('http://localhost:5000/api/login', data);
 
-      if (response.data.message === 'Login successful') {
+      if (response.data.message === 'User logged in successfully') {
         alert(response.data.message);
         navigate('/dashboard'); // Preusmjeri korisnika na dashboard nakon prijave
       } else {

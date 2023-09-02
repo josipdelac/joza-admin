@@ -1,3 +1,4 @@
+from asyncio import wait
 import random
 import traceback
 from flask import Flask, request, jsonify, send_file
@@ -35,7 +36,14 @@ db = mysql.connector.connect(
     password="",
     database="uiapp"
 )
-
+def get_db():
+    return mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="",
+    database="uiapp"
+    )
+    
 
 
 
@@ -135,7 +143,6 @@ def register():
         return jsonify({'message': 'Error registering user'}), 500
     
 
-executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 
 def hash_password(password, salt, pepper):
     combined_password = password + salt + pepper
@@ -145,18 +152,17 @@ def hash_password(password, salt, pepper):
 def verify_password(combined_password, stored_password):
     return sha256_crypt.verify(combined_password, stored_password)
 
-def process_login(email, password, ipAddress, ipMetadata, cursor, *args, **kwargs):
-    salt_string = kwargs['salt_string']
-
+def process_login(email, password, ipAddress, ipMetadata, salt_string,index):
     country = ipMetadata['country']
     city = ipMetadata['city']
     timezone = ipMetadata['timezone']
-
+    cursor= db.cursor(buffered=True)
     # Dohvaćanje korisnika iz baze prema emailu
     query = "SELECT id, password, first_name, last_name FROM users WHERE email = %s"
     cursor.execute(query, (email,))
     user_data = cursor.fetchone()
-
+    print("UserData"+str(user_data))
+    return_value= False
     if user_data:
         
         user_id = user_data[0]
@@ -169,27 +175,27 @@ def process_login(email, password, ipAddress, ipMetadata, cursor, *args, **kwarg
             salt = char
             combined_password = password + salt + pepper
             #hashed_combined_password = hash_password(combined_password)
-            print ("Password je "+password+" Sol je "+salt+" Biber je "+pepper+" hesirana je: ")
+            print (str(index)+":"+"Password je "+password+" Sol je "+salt+" Biber je "+pepper+" hesirana je: "+combined_password)
 
             if verify_password(combined_password, stored_password):
                 print("pogodak"+city+timezone+country+ipAddress)
 
                 query = "INSERT INTO transaction (userid, coutry, city, ip, timezone) VALUES (%s, %s, %s, %s, %s)"
-                cursor.execute(query, (user_id, country, city, ipAddress, timezone))
-                db.commit()
-                db.commit()
-                return True
+                test=cursor.execute(query, (user_id, country, city, ipAddress, timezone))
+                blabla=db.commit()
+                print("Test",test,blabla)
+                return_value= True
+                break
 
 
-    return False
+    return (index,return_value)
     
-
+    
 #Api za login
 @app.route('/api/login', methods=['POST'])
 @cross_origin(origins='http://localhost:3000', methods=['POST'])
 def login_route():
-    cursor = db.cursor()
-
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
     data = request.get_json()
     email = data['email']
     password = data['password']
@@ -197,10 +203,16 @@ def login_route():
     ipMetadata = get_ip(ipAddress)
     salts= ['abcčćdđ','efghijk','lmnopqrs','štuvwxyzž']
     results = []
-    for salt in salts:
-        results.append(executor.submit(process_login,email, password, ipAddress, ipMetadata, cursor, salt_string=salt))
-
-    return jsonify(list(map(lambda result: result.result(), results)))
+    for index,salt in enumerate(salts):
+        print("Salt",salt,index)
+        results.append(executor.submit(process_login,email, password, ipAddress, ipMetadata, salt,index))
+    executor.shutdown()
+    for result in results:
+        print(result.result())
+    print(results)
+    if any(map(lambda n: n.result()[1],results)):
+        return jsonify({'message': 'User logged in successfully'})
+    return jsonify({'message': 'Error logging in user'})
 
    
 
