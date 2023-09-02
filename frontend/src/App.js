@@ -1,7 +1,10 @@
-import React, { Component, Suspense } from 'react'
+import React, { Component, Suspense, useState } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import './scss/style.scss'
-
+import localization from './assets/languages/localization.json'
+import Select from 'react-select'
+import { LanguageProvider } from './components/localizationContext'
+import { get } from 'lodash'
 const loading = (
   <div className="pt-3 text-center">
     <div className="sk-spinner sk-spinner-pulse"></div>
@@ -22,26 +25,33 @@ const Edit = React.lazy(() => import('./views/pages/login/Edit'))
 
 
 
-class App extends Component {
-  render() {
+const App = () =>{
+    const [lang, setlang] = useState('en')
     return (
       <HashRouter>
-        <Suspense fallback={loading}>
-          <Routes>
-            <Route exact path="/login" name="Login Page" element={<Login />} />
-            <Route exact path="/tablica" name="Tablica" element={<Tablica />} />
-            <Route exact path="/register" name="Register Page" element={<Register />} />
-            <Route exact path="/404" name="Page 404" element={<Page404 />} />
-            <Route exact path="/500" name="Page 500" element={<Page500 />} />
-            <Route exact path="/kriptiranje" name="Kriptiranje" element={<Kriptiranje/>} />
-            <Route exact path="/edit/:id/edit" name="Edit User" element={<Edit/>} />
+        <LanguageProvider value={get(localization,lang)}>
+          <Suspense fallback={loading}>
+            <div style={{display:"flex", flexDirection:"row-reverse"}}>
+            <button onClick={()=> setlang('en')}>en</button>
+            <button onClick={()=> setlang('hr')}>hr</button>
 
-            <Route path="*" name="Home" element={<DefaultLayout />} />
-          </Routes>
-        </Suspense>
+            </div>
+            <Routes>
+              <Route exact path="/login" name="Login Page" element={<Login />} />
+              <Route exact path="/tablica" name="Tablica" element={<Tablica />} />
+              <Route exact path="/register" name="Register Page" element={<Register />} />
+              <Route exact path="/404" name="Page 404" element={<Page404 />} />
+              <Route exact path="/500" name="Page 500" element={<Page500 />} />
+              <Route exact path="/kriptiranje" name="Kriptiranje" element={<Kriptiranje />} />
+              <Route exact path="/edit/:id/edit" name="Edit User" element={<Edit />} />
+
+              <Route path="*" name="Home" element={<DefaultLayout />} />
+            </Routes>
+          </Suspense>
+        </LanguageProvider>
       </HashRouter>
     )
   }
-}
+
 
 export default App
