@@ -2,7 +2,7 @@ import json
 from flask_cors import CORS, cross_origin
 import pymongo
 from flask import Flask, request, jsonify
-
+from aeskey import AES
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 
 mydb = myclient["RPA"]
@@ -55,7 +55,8 @@ def get_last_entry(robot_id):
     for a in x:
        # print(a)
         del a["_id"]
-        return a
+        encrypted, tag = AES.encrypt(str(a))
+        return (a,tag)
     return "JBG"
 
 @app.route('/sum_total_items/<type>', methods=['GET'])
