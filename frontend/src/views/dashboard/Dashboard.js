@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 
 import {
   CAvatar,
@@ -50,6 +50,7 @@ import { useGetRobotStatus, useGetRobotStatusLastEntry, useGetRobotsStatusLastEn
 import { jsPDF } from "jspdf";
 var jsRTF = require('jsrtf');
 import { saveAs } from 'file-saver';
+import LanguageContext from 'src/components/localizationContext'
 
 const Dashboard = () => {
   const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
@@ -64,7 +65,9 @@ const Dashboard = () => {
   const [robotEntries, setRobotEntries] = useState([])
   const [last_entry, setlast_entry] = useState([])
   const [total_processed, setTotalProcessed] = useState({pdf: 0, web:0})
-
+  const value = useContext(LanguageContext);  
+  console.log("Context", value)
+  
   useEffect(() => {
     const getResults = async (id) => { 
       const results = await Promise.all( [useGetRobotsStatusLastEntries(),  useGetRobotStatusLastEntry(id),useGetProcessedItems("pdf"),useGetProcessedItems("web")]);
@@ -83,7 +86,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-    const intervalId = setInterval(fetchData, 10000);
+    const intervalId = setInterval(fetchData, 100000000);
 
   // Clean up interval on component unmount
   return () => {
@@ -134,7 +137,7 @@ const Dashboard = () => {
     saveAs(blob, "report.rtf");
 
   }
-   
+   const localization= useContext('lo')
 
   return (
     <>
@@ -278,7 +281,7 @@ const Dashboard = () => {
                   <CRow>
                     <CCol sm={6}>
                       <div className="border-start border-start-4 border-start-info py-1 px-3">
-                        <div className="text-medium-emphasis small">Total documents processed</div>
+                        <div className="text-medium-emphasis small">{value.documents_processed} </div>
                         <div className="fs-5 fw-semibold">{total_processed.pdf}</div>
                       </div>
                     </CCol>
