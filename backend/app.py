@@ -14,7 +14,14 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 import concurrent.futures
 import subprocess
+from Crypto.Cipher import AES
+import base64
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import default_backend
+from io import BytesIO
 
+import os
 
 
 app = Flask(__name__)
@@ -223,6 +230,157 @@ def run_process_b():
     except subprocess.CalledProcessError as e:
         return jsonify({'error': f'Greška prilikom izvršavanja Procesa B: {e}'})    
     
+
+# Select * from users
+def get_users():
+    cursor = db.cursor()
+    query = "SELECT * FROM users WHERE deleted = FALSE"
+    cursor.execute(query)
+    users = cursor.fetchall()
+    cursor.close()
+    return users
+
+# app.route that show all users in datatable
+@app.route('/api/users', methods=['GET'])
+@cross_origin(origins='http://localhost:3000', methods=['GET'])
+
+def get_all_users():
+    users = get_users()
+    user_list = []
+    for user in users:
+        user_dict = {
+            'id': user[0],
+            'first_name': user[1],
+            'last_name': user[2],
+            'email': user[3],
+            'country': user[4],
+            # Dodajte ostale podatke o korisnicima prema potrebi
+        }
+        user_list.append(user_dict)
+    
+    return jsonify(user_list)
+
+# app.route for showing user details by ID
+@app.route('/api/userdetails/<int:id>/edit', methods=['GET'])
+@cross_origin(origins='http://localhost:3000', methods=['GET'])
+
+def get_user_details(id):
+    cursor = db.cursor()
+    query = "SELECT * FROM users WHERE id = %s"
+    cursor.execute(query, (id,))
+    user = cursor.fetchone()
+    cursor.close()
+
+    if user is not None:
+        user_dict = {
+            'id': user[0],
+            'first_name': user[1],
+            'last_name': user[2],
+            'email': user[3],
+            'country': user[4],
+            # Dodajte ostale podatke o korisniku prema potrebi
+        }
+        return jsonify(user_dict)
+    else:
+        return jsonify({'message': 'Korisnik s ID-om {} nije pronađen.'.format(id)}), 404
+    
+# app.route for updating user by ID
+@app.route('/api/userupdate/<int:id>/edit', methods=['PUT'])
+@cross_origin(origins='http://localhost:3000', methods=['PUT'])
+
+def update_user(id):
+    data = request.get_json()
+    first_name = data['first_name']
+    last_name = data['last_name']
+    email = data['email']
+    country = data['country']
+
+    cursor = db.cursor()
+    query = "UPDATE users SET first_name = %s, last_name = %s, email = %s, country = %s WHERE id = %s"
+    cursor.execute(query, (first_name, last_name, email, country, id))
+    db.commit()
+    cursor.close()
+
+    return jsonify({'message': 'Korisnik s ID-om {} je ažuriran.'.format(id)})
+
+# app.route for deleting user by ID
+@app.route('/api/userdelete/<int:id>', methods=['DELETE'])
+@cross_origin(origins='http://localhost:3000', methods=['DELETE'])
+
+def delete_user(id):
+    cursor = db.cursor()
+    query = "UPDATE users SET deleted = 1 WHERE id =%s"
+    cursor.execute(query, (id,))
+    db.commit()
+    cursor.close()
+
+    return jsonify({'message': 'Korisnik s ID-om {} je izbrisan.'.format(id)})
+
+
+"""
+
+# Dohvati šifrirani ključ iz varijable okruženja
+encrypted_key_hex = os.environ.get("ENCRYPTION_KEY")
+encryption_key = base64.b64decode(encrypted_key_hex)
+
+# Kriptiranje teksta koristeći AES
+def encrypt_text(data, key):
+    cipher = Cipher(algorithms.AES(key), modes.EAX(), default_backend())
+    encryptor = cipher.encryptor()
+    ciphertext = encryptor.update(data) + encryptor.finalize()
+    return ciphertext
+
+# Dekriptiranje kriptiranog teksta koristeći AES
+def decrypt_text(data, key):
+    cipher = Cipher(algorithms.AES(key), modes.EAX(), default_backend())
+    encryptor = cipher.encryptor()
+    ciphertext, tag = encryptor.update(data), encryptor.finalize()
+    return ciphertext, tag
+
+# Endpoint za kriptiranje PDF-a
+@app.route('/api/encrypt', methods=['POST'])
+@cross_origin(origins='http://localhost:3000', methods=['POST'])
+def encrypt_pdf():
+    
+
+   def encrypt_pdf():
+    # Provjerava prisutnost ključa 'pdf' u zahtjevu
+    if 'pdf' not in request.files:
+        return jsonify({'error': 'PDF file not found in request'}), 400
+
+    pdf_file = request.files['pdf']
+
+    # Provjerava je li poslana datoteka PDF formata
+    if not pdf_file.content_type.startswith('application/pdf'):
+        return jsonify({'error': 'Invalid PDF file'}), 400
+
+    # Kriptira PDF datoteku
+    pdf_data = pdf_file.read()
+    encrypted_pdf_data = encrypt_text(pdf_data, encryption_key)
+
+    # Vraća kriptiranu PDF datoteku
+    return send_file(
+        io.BytesIO(encrypted_pdf_data),
+        as_attachment=True,
+        download_name='encrypted.pdf',
+    )
+
+
+# Endpoint za dekriptiranje PDF-a
+@app.route('/api/decrypt', methods=['POST'])
+@cross_origin(origins='http://localhost:3000', methods=['POST'])
+
+def decrypt_pdf():
+    # Prima PDF datoteku iz frontend-a
+    pdf_file = request.files['pdf']
+    pdf_data = pdf_file.read()
+
+    
+    decrypted_pdf_data = decrypt_text(pdf_data, encryption_key)
+
+    return send_file(io.BytesIO(decrypted_pdf_data), as_attachment=True, download_name='decrypted.pdf')
+
+    """
 
 if __name__ == '__main__':
     app.run(debug=True)
