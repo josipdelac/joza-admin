@@ -1,6 +1,7 @@
 import os
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
+from dotenv import load_dotenv
 
 # Funkcija za generiranje ključa i spremanje u varijable okruženja
 def generate_and_save_encryption_key():
@@ -8,16 +9,18 @@ def generate_and_save_encryption_key():
     encrypted_key = encryption_key.hex()
     
     # Spremi ključ u varijablu okruženja
-    os.environ["ENCRYPTION_KEY"] = encrypted_key
+    os.getenv["ENCRYPTION_KEY"] = encrypted_key
 
     # Generiraj i spremi ključ u varijable okruženja
     print("Encryption key generated and saved to environment variable.")
 
 
 # Dohvati šifrirani ključ iz varijable okruženja
-encrypted_key_hex = os.set["ENCRYPTION_KEY"]
+load_dotenv()
+encrypted_key_hex =os.getenv("AES_ENCRYPTION_KEY")
+print(encrypted_key_hex)
 encryption_key = bytes.fromhex(encrypted_key_hex)
-class AES():
+class AES_HANDLER():
     def encrypt(plaintext):
         if encryption_key is None:
             print("Šifrirani ključ nije postavljen. Postavite ENCRYPTION_KEY varijablu okruženja.")
@@ -38,3 +41,5 @@ class AES():
         print("Kriptirani tekst je:",encryptedtext)
         print("Decrypted:", decrypted_data.decode())
         return decrypted_data.decode()
+    def __init__(self) -> None:
+        pass

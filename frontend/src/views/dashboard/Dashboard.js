@@ -83,7 +83,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-    const intervalId = setInterval(fetchData, 10000);
+    const intervalId = setInterval(fetchData, 1000000);
 
   // Clean up interval on component unmount
   return () => {
