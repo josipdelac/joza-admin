@@ -140,7 +140,7 @@ def register():
         
 
        
-        return jsonify({'message': 'User registered successfully', "jwt": create_access_token(identity=email)})
+        return jsonify({'message': 'User registered successfully', "jwt": create_access_token(identity=email), "user_details": data})
     except Exception as e:
         print("Error:", e) 
         traceback.print_exc()  # Ispis detalja greške
@@ -189,7 +189,7 @@ def process_login(email, password, ipAddress, ipMetadata, salt_string,index):
                 test=cursor.execute(query, (user_id, country, city, ipAddress, timezone))
                 blabla=db.commit()
                 print("Test",test,blabla)
-                return_value= True
+                return_value= (True,user_data)
                 break
 
 
@@ -215,8 +215,11 @@ def login_route():
     for result in results:
         print(result.result())
     print(results)
-    if any(map(lambda n: n.result()[1],results)):
-        return jsonify({'message': 'User logged in successfully', "jwt": create_access_token(identity=email)})
+
+    for x in results:
+        if(x.result()[1][0]):
+            return jsonify({'message': 'User logged in successfully', "jwt": create_access_token(identity=email), "user_details": x.result()[1][1]}) 
+   
     return jsonify({'message': 'Error logging in user'})
 
    

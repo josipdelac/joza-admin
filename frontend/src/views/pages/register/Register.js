@@ -1,5 +1,8 @@
-<script defer src="https://polyfill.io/v3/polyfill.min.js?features=String.prototype.padEnd|always"></script>
-import React, {useState, useNavigate, useEffect} from 'react'
+;<script
+  defer
+  src="https://polyfill.io/v3/polyfill.min.js?features=String.prototype.padEnd|always"
+></script>
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   CButton,
@@ -16,36 +19,32 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
-import axios from 'axios';
-import { convert } from 'xml2js'; // xml2js library for converting XML to JSON
-import {useNavigate } from 'react-router-dom';
+import axios from 'axios'
+import { convert } from 'xml2js' // xml2js library for converting XML to JSON
+import { useNavigate } from 'react-router-dom'
 
-
-
-
-
-
-const Register = () => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [country, setCountry] = useState('');
-  const [countryOptions, setCountryOptions] = useState([]);
-  const [profileImage, setProfileImage] = useState(null);
-  const navigate = useNavigate();
+const Register = (props) => {
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [country, setCountry] = useState('')
+  const [countryOptions, setCountryOptions] = useState([])
+  const [profileImage, setProfileImage] = useState(null)
+  const navigate = useNavigate()
+  const { setUser } = props
 
   const handleImageChange = (e) => {
-    const imageFile = e.target.files[0];
-    const reader = new FileReader();
+    const imageFile = e.target.files[0]
+    const reader = new FileReader()
 
     reader.onload = (event) => {
-      const base64Image = event.target.result.split(',')[1];
-      setProfileImage(base64Image);
-    };
+      const base64Image = event.target.result.split(',')[1]
+      setProfileImage(base64Image)
+    }
 
-    reader.readAsDataURL(imageFile);
-  };
+    reader.readAsDataURL(imageFile)
+  }
 
   useEffect(() => {
     const fetchCountryNames = async () => {
@@ -56,7 +55,7 @@ const Register = () => {
             </ListOfCountryNamesByName>
           </soap12:Body>
         </soap12:Envelope>
-      `;
+      `
 
       try {
         const response = await axios.post('http://localhost:5000/api/countries', soapRequest, {
@@ -64,20 +63,17 @@ const Register = () => {
             'Content-Type': 'application/soap+xml;charset=UTF-8',
             'Accept-Encoding': 'gzip,deflate',
           },
-        });
+        })
         console.log(response)
 
-
-        
-
-        setCountryOptions(response?.data);
+        setCountryOptions(response?.data)
       } catch (error) {
-        console.error('Error fetching country names:', error);
+        console.error('Error fetching country names:', error)
       }
-    };
+    }
 
-    fetchCountryNames();
-  }, []);
+    fetchCountryNames()
+  }, [])
 
   const handleRegister = async () => {
     try {
@@ -88,22 +84,22 @@ const Register = () => {
         password,
         country,
         profile_image: profileImage,
-      };
+      }
 
-      const response = await axios.post('http://localhost:5000/api/register', data);
+      const response = await axios.post('http://localhost:5000/api/register', data)
 
       if (response.data.message === 'User registered successfully') {
-        alert(response.data.message);
-        localStorage.setItem("token",response.data.jwt)
-        navigate('/dashboard'); // Preusmjeri korisnika na dashboard nakon prijave
+        alert(response.data.message)
+        localStorage.setItem('token', response.data.jwt)
+        setUser(response.data.user_details)
+        navigate('/dashboard') // Preusmjeri korisnika na dashboard nakon prijave
       } else {
-        alert(response.data.message);
+        alert(response.data.message)
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error:', error)
     }
-  };
-
+  }
 
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
@@ -157,34 +153,29 @@ const Register = () => {
                   <CInputGroup className="mb-4">
                     <CInputGroupText>🌍</CInputGroupText>
                     <CFormSelect
-                    aria-label="Country"
+                      aria-label="Country"
                       value={country}
                       onChange={(e) => setCountry(e.target.value)}
-                      
                     >
-                      <option style={{padding: "0.5rem 0rem"}} value="">Odaberi državu</option>
+                      <option style={{ padding: '0.5rem 0rem' }} value="">
+                        Odaberi državu
+                      </option>
                       {countryOptions?.map((countryName, index) => (
-                        <option style={{padding: "0.5rem 0rem"}} key={index} value={countryName}>
+                        <option style={{ padding: '0.5rem 0rem' }} key={index} value={countryName}>
                           {countryName}
                         </option>
                       ))}
-                     
                     </CFormSelect>
                   </CInputGroup>
                   <CInputGroup className="mb-3">
                     {/* Dodajte input za odabir slike */}
-                    <CFormInput
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
+                    <CFormInput type="file" accept="image/*" onChange={handleImageChange} />
                   </CInputGroup>
                   <div className="d-grid">
                     <CButton color="success" onClick={handleRegister}>
                       Create Account
                     </CButton>
                   </div>
-                  
                 </CForm>
               </CCardBody>
             </CCard>
@@ -192,7 +183,7 @@ const Register = () => {
         </CRow>
       </CContainer>
     </div>
-  );
-};
+  )
+}
 
-export default Register;
+export default Register

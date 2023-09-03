@@ -19,13 +19,13 @@ import axios from 'axios'
 import {useNavigate } from 'react-router-dom';
 
 
-function Login() {
+function Login(props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [ipAddress, setIPAddress] = useState('');
   const navigate = useNavigate();
  // const navigate = useNavigate();
-
+  const {setUser} = props;
   const handleLogin = async () => {
     try {
       const data = {
@@ -39,6 +39,7 @@ function Login() {
       if (response.data.message === 'User logged in successfully') {
         alert(response.data.message);
         localStorage.setItem("token",response.data.jwt)
+        setUser(response.data.user_details)
         navigate('/dashboard'); // Preusmjeri korisnika na dashboard nakon prijave
       } else {
         alert(response.data.message);
