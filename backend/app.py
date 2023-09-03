@@ -21,12 +21,16 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 from io import BytesIO
-
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
 import os
 
 
 app = Flask(__name__)
-
+app.config["JWT_SECRET_KEY"] = "super-jaki-key" 
+jwt = JWTManager(app)
 CORS(app, resources={r"/api/*": {"origins": "*", "methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"}})
 
 # Konfiguracija baze podataka
@@ -59,6 +63,7 @@ def generate_pepper(first_name, last_name, email):
     return f"{first_name.lower()}{last_name.lower()}{email_prefix}"
 
 @app.route('/api/countries', methods=['POST'])
+@jwt_required()
 def proxy_countries_request():
     try:
         # Dohvatite SOAP zahtjev iz tijela zahtjeva
@@ -135,7 +140,7 @@ def register():
         
 
        
-        return jsonify({'message': 'User registered successfully'})
+        return jsonify({'message': 'User registered successfully', "jwt": create_access_token(identity=email)})
     except Exception as e:
         print("Error:", e) 
         traceback.print_exc()  # Ispis detalja greške
@@ -211,7 +216,7 @@ def login_route():
         print(result.result())
     print(results)
     if any(map(lambda n: n.result()[1],results)):
-        return jsonify({'message': 'User logged in successfully'})
+        return jsonify({'message': 'User logged in successfully', "jwt": create_access_token(identity=email)})
     return jsonify({'message': 'Error logging in user'})
 
    

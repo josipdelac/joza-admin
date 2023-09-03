@@ -38,6 +38,7 @@ function Login() {
 
       if (response.data.message === 'User logged in successfully') {
         alert(response.data.message);
+        localStorage.setItem("token",response.data.jwt)
         navigate('/dashboard'); // Preusmjeri korisnika na dashboard nakon prijave
       } else {
         alert(response.data.message);

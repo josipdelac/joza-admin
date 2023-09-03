@@ -18,6 +18,7 @@ import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 import axios from 'axios';
 import { convert } from 'xml2js'; // xml2js library for converting XML to JSON
+import {useNavigate } from 'react-router-dom';
 
 
 
@@ -32,6 +33,7 @@ const Register = () => {
   const [country, setCountry] = useState('');
   const [countryOptions, setCountryOptions] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
+  const navigate = useNavigate();
 
   const handleImageChange = (e) => {
     const imageFile = e.target.files[0];
@@ -92,7 +94,8 @@ const Register = () => {
 
       if (response.data.message === 'User registered successfully') {
         alert(response.data.message);
-        // Dodajte kod za preusmjeravanje na stranicu za prijavu
+        localStorage.setItem("token",response.data.jwt)
+        navigate('/dashboard'); // Preusmjeri korisnika na dashboard nakon prijave
       } else {
         alert(response.data.message);
       }

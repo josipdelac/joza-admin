@@ -7,7 +7,12 @@ const API_URL= "http://127.0.0.1:8001";
 
 
 export const useGetRobotStatus = async (id) => {
-    const result = await axios.get(`${API_URL}/entries/`);
+    const config = {
+        headers:{
+            "Authorization" : `Bearer ${localStorage.getItem(token)}`
+        } 
+    }
+    const result = await axios.get(`${API_URL}/entries/`,config);
     console.log("ALL ENTRIES", result)
     return result;
 };
@@ -24,7 +29,12 @@ const hexToBytes = (hex) => {
 
  
 export const useGetRobotStatusLastEntry = async (id) => {
-    const result = await axios.get(`${API_URL}/last_entry/${id}`);
+    const config = {
+        headers:{
+            "Authorization" : `Bearer ${localStorage.getItem(token)}`
+        } 
+    }
+    const result = await axios.get(`${API_URL}/last_entry/${id}`,config);
     
     const key = process.env.REACT_APP_AES_ENCRYPTION_KEY;
     console.log("Key",key)
@@ -38,11 +48,21 @@ export const useGetRobotStatusLastEntry = async (id) => {
 };
 
 export const useGetProcessedItems = async (type) => {
-    const result = await axios.get(`${API_URL}/sum_total_items/${type}`);
+    const config = {
+        headers:{
+            "Authorization" : `Bearer ${localStorage.getItem(token)}`
+        } 
+    }
+    const result = await axios.get(`${API_URL}/sum_total_items/${type}`,config);
     return result;
 };
 
 export const useGetRobotsStatusLastEntries = async () => {
-    const result = await axios.get(`${API_URL}/last_entries/`);
+    const config = {
+        headers:{
+            "Authorization" : `Bearer ${localStorage.getItem(token)}`
+        } 
+    }
+    const result = await axios.get(`${API_URL}/last_entries/`,config);
     return result;
 };
