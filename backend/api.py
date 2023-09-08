@@ -4,9 +4,17 @@ import pymongo
 from flask import Flask, request, jsonify
 from aeskey import AES_HANDLER
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-
+import datetime
 mydb = myclient["RPA"]
+import configparser
+import base64
 
+timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+config= configparser.ConfigParser()
+config.read("api.ini")
+config.set("api", "last_run",timestamp)
+config.write(open("api.ini", "w"))
 
 app = Flask(__name__)
 
@@ -58,11 +66,10 @@ def get_last_entry(robot_id):
         print("LASTENTRIES2")
 
         del a["_id"]
-        encrypted, tag = AES_HANDLER.encrypt(str(a).encode("utf8"))
-        print("ENCRIPTANOOOOO",encrypted)
-        return encrypted
+        
+        return json.dumps(a)
     print("UKURACIJE")
-    return 
+    return b'test'
 
 @app.route('/sum_total_items/<type>', methods=['GET'])
 @cross_origin()
@@ -110,4 +117,4 @@ def sum_total_items(type):
         return str(e) 
     
 if __name__ == '__main__':
-    app.run(debug=True, port=8001)
+    app.run(debug=config.getboolean("api","debug"), port=config.getint("api",option="port"))

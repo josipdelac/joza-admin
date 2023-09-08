@@ -26,12 +26,25 @@ from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
 import os
+from dotenv import load_dotenv
+import configparser
+import datetime
+import secrets
+
+
 
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = "super-jaki-key" 
 jwt = JWTManager(app)
 CORS(app, resources={r"/api/*": {"origins": "*", "methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"}})
+# Get the current timestamp
+timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+config= configparser.ConfigParser()
+config.read("app.ini")
+config.set("app", "last_run",timestamp)
+config.write(open("app.ini", "w"))
 
 # Konfiguracija baze podataka
 db = mysql.connector.connect(
@@ -50,6 +63,17 @@ def get_db():
     
 
 
+# AES kriptiranje
+# Uvoz ključa za AES iz .env datoteke
+load_dotenv()
+aes_key_hex = os.getenv("AES_ENCRYPTION_KEY")  # Prilagodite kako odgovara vašoj konfiguraciji
+aes_key = bytes.fromhex(aes_key_hex)
+print(aes_key)
+# Generiranje slučajnog inicijalizacijskog vektora (IV)
+iv = os.urandom(16)  # 16 bajtova IV
+print(iv)
+# Inicijalizacija AES kriptera
+cipher = AES.new(aes_key, AES.MODE_CBC, iv)
 
 # Funkcija za generiranje "soli" na temelju slova hrvatske abecede
 def generate_salt():
@@ -63,7 +87,7 @@ def generate_pepper(first_name, last_name, email):
     return f"{first_name.lower()}{last_name.lower()}{email_prefix}"
 
 @app.route('/api/countries', methods=['POST'])
-@jwt_required()
+
 def proxy_countries_request():
     try:
         # Dohvatite SOAP zahtjev iz tijela zahtjeva
@@ -104,7 +128,6 @@ def register():
         country = data['country']
 
         
-
         password = data['password']
         if 'profile_image' in data:
             profile_image_base64 = data['profile_image']     # Dobivanje slike iz JSON-a
@@ -163,17 +186,25 @@ def process_login(email, password, ipAddress, ipMetadata, salt_string,index):
     timezone = ipMetadata['timezone']
     cursor= db.cursor(buffered=True)
     # Dohvaćanje korisnika iz baze prema emailu
-    query = "SELECT id, password, first_name, last_name FROM users WHERE email = %s"
+    query = "SELECT * FROM users WHERE email = %s"
     cursor.execute(query, (email,))
     user_data = cursor.fetchone()
-    print("UserData"+str(user_data))
-    return_value= False
+    #print("UserData"+str(user_data))
+    return_value= (False,None)
     if user_data:
         
         user_id = user_data[0]
-        stored_password = user_data[1]
-        first_name = user_data[2]
-        last_name = user_data[3]
+        stored_password = user_data[5]
+        first_name = user_data[1]
+        last_name = user_data[2]
+        email = user_data[3]
+        encrypted_email = user_data[8]
+        email_iv = user_data[9]
+       
+       # picture =str(io.BytesIO(user_data[6]), mimetype='image/jpeg')
+
+        
+        
         pepper = generate_pepper(first_name, last_name, email)
 
         for char in salt_string:
@@ -184,43 +215,94 @@ def process_login(email, password, ipAddress, ipMetadata, salt_string,index):
 
             if verify_password(combined_password, stored_password):
                 print("pogodak"+city+timezone+country+ipAddress)
+                
+                ipAddress_bytes =ipAddress.encode('utf-8')
+                while len(ipAddress_bytes) % 16 != 0:
+                    ipAddress_bytes += b' '  # Dopuniti sa praznim bajtovima ako je potrebno
+                encrypted_ipAddress = cipher.encrypt(ipAddress_bytes)
 
-                query = "INSERT INTO transaction (userid, coutry, city, ip, timezone) VALUES (%s, %s, %s, %s, %s)"
-                test=cursor.execute(query, (user_id, country, city, ipAddress, timezone))
+                query = "INSERT INTO transaction (userid, coutry, city, ip, iv, timezone) VALUES (%s, %s, %s, %s, %s, %s)"
+                test=cursor.execute(query, (user_id, country, city, encrypted_ipAddress, iv, timezone))
                 blabla=db.commit()
                 print("Test",test,blabla)
-                return_value= (True,user_data)
+                return_value= (True,{"first_name":first_name,"last_name":last_name,"email":email})
                 break
 
-
+    # cursor.reset()
     return (index,return_value)
     
     
 #Api za login
 @app.route('/api/login', methods=['POST'])
 @cross_origin(origins='http://localhost:3000', methods=['POST'])
+#@jwt_required()
 def login_route():
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
     data = request.get_json()
     email = data['email']
     password = data['password']
     ipAddress = data['ipAddress']
     ipMetadata = get_ip(ipAddress)
     salts= ['abcčćdđ','efghijk','lmnopqrs','štuvwxyzž']
+    
+        
     results = []
     for index,salt in enumerate(salts):
         print("Salt",salt,index)
         results.append(executor.submit(process_login,email, password, ipAddress, ipMetadata, salt,index))
     executor.shutdown()
-    for result in results:
-        print(result.result())
-    print(results)
+    # for result in results:
+    #     print(result.result())  
+    # print(results)
 
     for x in results:
         if(x.result()[1][0]):
-            return jsonify({'message': 'User logged in successfully', "jwt": create_access_token(identity=email), "user_details": x.result()[1][1]}) 
+            return jsonify({'message': 'User logged in successfully', "jwt": create_access_token(identity=email,expires_delta=False ), "user_details": x.result()[1][1]}) 
    
     return jsonify({'message': 'Error logging in user'})
+
+@app.route('/api/get_user', methods=['GET'])
+@cross_origin(origins='http://localhost:3000', methods=['GET'])
+@jwt_required()
+def get_user():
+    print(request.headers)
+    print("prije ulaska u upit")
+   # user_pub= request.json["user_pub"]
+    email=get_jwt_identity()
+    print(email)
+    query = "SELECT * FROM users INNER JOIN transaction ON users.id = transaction.userid WHERE users.email = %s ORDER BY transaction.timestamp DESC LIMIT 1"
+    cursor = db.cursor()
+    cursor.execute(query, (email,))
+    user_data = cursor.fetchone()
+    
+     # Inicijalizacija AES kriptera za dekripciju
+    decryptor = AES.new(aes_key, AES.MODE_CBC, iv=user_data[16])
+
+    # Dekriptiranje kriptiranog emaila
+    decrypted_ip_bytes = decryptor.decrypt(user_data[15])	
+
+   
+   
+    decrypted_ip = decrypted_ip_bytes.rstrip(b' ').decode('utf-8')
+    print(decrypted_ip)
+   
+   
+    
+    first_name = user_data[1]
+    last_name = user_data[2]
+    email = user_data[3]
+    
+    type = user_data[7]
+    ipAddress = decrypted_ip
+    
+   
+    
+    
+    
+    
+    
+    return jsonify({'userdata': {"first_name":first_name,"last_name":last_name,"email":email, "type":type, "ipAddress":ipAddress}})
+    # return {}
 
    
 
@@ -337,70 +419,7 @@ def delete_user(id):
     return jsonify({'message': 'Korisnik s ID-om {} je izbrisan.'.format(id)})
 
 
-"""
-
-# Dohvati šifrirani ključ iz varijable okruženja
-encrypted_key_hex = os.environ.get("ENCRYPTION_KEY")
-encryption_key = base64.b64decode(encrypted_key_hex)
-
-# Kriptiranje teksta koristeći AES
-def encrypt_text(data, key):
-    cipher = Cipher(algorithms.AES(key), modes.EAX(), default_backend())
-    encryptor = cipher.encryptor()
-    ciphertext = encryptor.update(data) + encryptor.finalize()
-    return ciphertext
-
-# Dekriptiranje kriptiranog teksta koristeći AES
-def decrypt_text(data, key):
-    cipher = Cipher(algorithms.AES(key), modes.EAX(), default_backend())
-    encryptor = cipher.encryptor()
-    ciphertext, tag = encryptor.update(data), encryptor.finalize()
-    return ciphertext, tag
-
-# Endpoint za kriptiranje PDF-a
-@app.route('/api/encrypt', methods=['POST'])
-@cross_origin(origins='http://localhost:3000', methods=['POST'])
-def encrypt_pdf():
-    
-
-   def encrypt_pdf():
-    # Provjerava prisutnost ključa 'pdf' u zahtjevu
-    if 'pdf' not in request.files:
-        return jsonify({'error': 'PDF file not found in request'}), 400
-
-    pdf_file = request.files['pdf']
-
-    # Provjerava je li poslana datoteka PDF formata
-    if not pdf_file.content_type.startswith('application/pdf'):
-        return jsonify({'error': 'Invalid PDF file'}), 400
-
-    # Kriptira PDF datoteku
-    pdf_data = pdf_file.read()
-    encrypted_pdf_data = encrypt_text(pdf_data, encryption_key)
-
-    # Vraća kriptiranu PDF datoteku
-    return send_file(
-        io.BytesIO(encrypted_pdf_data),
-        as_attachment=True,
-        download_name='encrypted.pdf',
-    )
-
-
-# Endpoint za dekriptiranje PDF-a
-@app.route('/api/decrypt', methods=['POST'])
-@cross_origin(origins='http://localhost:3000', methods=['POST'])
-
-def decrypt_pdf():
-    # Prima PDF datoteku iz frontend-a
-    pdf_file = request.files['pdf']
-    pdf_data = pdf_file.read()
-
-    
-    decrypted_pdf_data = decrypt_text(pdf_data, encryption_key)
-
-    return send_file(io.BytesIO(decrypted_pdf_data), as_attachment=True, download_name='decrypted.pdf')
-
-    """
+   
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=config.getboolean("app","debug"), port=config.getint("app",option="port"))

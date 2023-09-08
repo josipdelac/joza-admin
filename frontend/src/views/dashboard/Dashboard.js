@@ -51,6 +51,8 @@ import { jsPDF } from "jspdf";
 var jsRTF = require('jsrtf');
 import { saveAs } from 'file-saver';
 import LanguageContext from 'src/components/localizationContext'
+import {useNavigate } from 'react-router-dom';
+
 
 const Dashboard = () => {
   const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
@@ -80,8 +82,9 @@ const Dashboard = () => {
     });*/
     const fetchData = async () => {
       const response = await getResults("ROO");
+      console.log("lastdsadsada:",response[1])
       setRobotEntries(response[0].data);
-      setlast_entry([response[1].data]);
+      setlast_entry([response[1]]);
       setTotalProcessed({pdf: response[2].data, web:response[3].data})
     };
 

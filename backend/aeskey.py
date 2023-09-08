@@ -19,7 +19,7 @@ def generate_and_save_encryption_key():
 load_dotenv()
 encrypted_key_hex =os.getenv("AES_ENCRYPTION_KEY")
 print(encrypted_key_hex)
-encryption_key = bytes.fromhex(encrypted_key_hex)
+encryption_key = encrypted_key_hex
 class AES_HANDLER():
     def encrypt(plaintext):
         if encryption_key is None:
