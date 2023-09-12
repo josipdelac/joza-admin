@@ -1,55 +1,3 @@
-/* import React, { useState } from 'react';
-import axios from 'axios';
-import { CAlert } from '@coreui/react'
-
-
-
-function App() {
-  const [excelIzlaznaPutanja, setExcelIzlaznaPutanja] = useState('');
-  const [pdfDirektorijum, setPdfDirektorijum] = useState('');
-
-  const handleRunProcess = async () => {
-    try {
-      const response = await axios.post('http://localhost:5000/api/tablice', {
-        excel_izlazna_putanja: excelIzlaznaPutanja,
-        pdf_direktorijum: pdfDirektorijum
-      });
-
-      alert(response.data.message);
-      console.log(response.data.message);
-      setVisible(true)
-    } catch (error) {
-      console.error(error.response ? error.response.data.error : error.message);
-    }
-  };
-
-  const [visible, setVisible] = useState(false)
-
-
-  return (
-    <div className="App">
-    <CAlert color="primary" dismissible visible={visible} onClose={() => setVisible(false)}>
-      TEst
-    </CAlert>
-      <input
-        type="text"
-        placeholder="Excel Izlazna Putanja"
-        value={excelIzlaznaPutanja}
-        onChange={e => setExcelIzlaznaPutanja(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="PDF Direktorijum"
-        value={pdfDirektorijum}
-        onChange={e => setPdfDirektorijum(e.target.value)}
-      />
-      <button onClick={handleRunProcess}>Pokreni Proces B</button>
-    </div>
-  );
-}
-
-export default App;
-*/
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -62,9 +10,18 @@ import {
   CInputGroupText,
   CRow,
   CAlert,
+  CCard,
+  CCardBody,
+  CCardGroup,
+  CForm,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
+import { cilFile, cilFolderOpen, cilLockLocked, cilUser } from '@coreui/icons'
+
 import { cilMagnifyingGlass } from '@coreui/icons'
+
+import { AppFooter, AppHeader,AppSidebar, AppBreadcrumb } from 'src/components';
+
 
 function App() {
     const [excelIzlaznaPutanja, setExcelIzlaznaPutanja] = useState('');
@@ -89,40 +46,61 @@ function App() {
   
     const [visible, setVisible] = useState(false)
   return (
-    <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
+    
+    <div>
+      <AppHeader />
+      <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
+      
       <CContainer>
         <CRow className="justify-content-center">
-          <CCol md={6}>
-          <CAlert color="primary" dismissible visible={visible} onClose={() => setVisible(false)}>
-          {message}
-            
-          </CAlert>
-            <div className="clearfix">
-            <input
-            type="text"
-            placeholder="Excel Izlazna Putanja"
-            value={excelIzlaznaPutanja}
-            onChange={e => setExcelIzlaznaPutanja(e.target.value)}
-            />
-            <input
-            type="text"
-            placeholder="PDF Direktorijum"
-            value={pdfDirektorijum}
-            onChange={e => setPdfDirektorijum(e.target.value)}
-            />
-        <button onClick={handleRunProcess}>Pokreni Proces B</button>
-            </div>
-            <CInputGroup className="input-prepend">
-              <CInputGroupText>
-                <CIcon icon={cilMagnifyingGlass} />
-              </CInputGroupText>
-              <CFormInput type="text" placeholder="What are you looking for?" />
-              <CButton color="info">Search</CButton>
-            </CInputGroup>
-          </CCol>
-        </CRow>
-      </CContainer>
+          <CCol md={8}>
+          <CCardGroup>
+              <CCard className="p-4">
+                <CCardBody>
+                  <CForm>
+                  <h1>HZMO tablice</h1>
+                  <p className="text-medium-emphasis">HZMO data extraction from pdf to .xlsx file</p>
+                  <CInputGroup className="mb-3">
+                      <CInputGroupText>
+                        <CIcon icon={cilFile} />
+                      </CInputGroupText>
+                      <CFormInput type="text" 
+                                  value={excelIzlaznaPutanja}  onChange={e => setExcelIzlaznaPutanja(e.target.value)} placeholder="Excel Izlazna Putanja" />
+                    </CInputGroup>
+                    <CInputGroup className="mb-3">
+                      <CInputGroupText>
+                        <CIcon icon={cilFolderOpen} />
+                      </CInputGroupText>
+                      <CFormInput type="text" 
+                                  value={pdfDirektorijum}  onChange={e => setPdfDirektorijum(e.target.value)} placeholder="PDF direktorij" />
+                    </CInputGroup>
+
+                    <CAlert color="primary" dismissible visible={visible} onClose={() => setVisible(false)}>
+                    {message}
+                      
+                    </CAlert>
+                    <CRow>
+                      <CCol xs={6}>
+                        <CButton onClick={handleRunProcess} color="primary" className="px-4 align-items-center">
+                          Pokreni proces
+                        </CButton>
+                      </CCol>
+                      
+                    </CRow>
+                    
+                     
+                      
+                  </CForm>
+                </CCardBody>
+              </CCard>
+            </CCardGroup>
+            </CCol>
+          </CRow>
+        </CContainer>
+      </div>
     </div>
+    
+    
   )
 }
 

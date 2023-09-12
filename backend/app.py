@@ -30,16 +30,25 @@ from dotenv import load_dotenv
 import configparser
 import datetime
 import secrets
+import xml.etree.ElementTree as ET
+from flask_basicauth import BasicAuth
+from flask_httpauth import HTTPBasicAuth
+
 
 
 
 
 app = Flask(__name__)
+auth = HTTPBasicAuth()
+
+
 app.config["JWT_SECRET_KEY"] = "super-jaki-key" 
 jwt = JWTManager(app)
 CORS(app, resources={r"/api/*": {"origins": "*", "methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"}})
 # Get the current timestamp
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
 
 config= configparser.ConfigParser()
 config.read("app.ini")
@@ -61,6 +70,8 @@ def get_db():
     database="uiapp"
     )
     
+
+
 
 
 # AES kriptiranje
@@ -111,7 +122,15 @@ def proxy_countries_request():
         print("Error:", e)
         return jsonify([])
     
+xml_file = "users.xml"
 
+if not os.path.exists(xml_file):
+    # Ako datoteka ne postoji, stvorite novu s korijenskim elementom "users"
+    root = ET.Element("users")
+else:
+    # Ako datoteka već postoji, učitajte postojeći XML
+    tree = ET.parse(xml_file)
+    root = tree.getroot()
 
 #Api za registraciju
 @app.route('/api/register', methods=['POST'])
@@ -161,7 +180,22 @@ def register():
         db.commit()
         cursor.close()
         
+       
 
+        # Kreirajte podatke o korisniku kao pod-elemente
+        user_id = str(len(root) + 1)  # Automatski broj korisnika
+        user = ET.SubElement(root, "user")
+
+        ET.SubElement(user, "id").text = user_id  # Dodajte <id> element s vrijednošću ID-a
+        ET.SubElement(user, "first_name").text =first_name
+        ET.SubElement(user, "last_name").text = last_name
+        ET.SubElement(user, "email").text = email
+        ET.SubElement(user, "country").text = country
+
+        # Kreirajte XML datoteku i spremite je
+        tree = ET.ElementTree(root)
+        tree.write(xml_file)
+    
        
         return jsonify({'message': 'User registered successfully', "jwt": create_access_token(identity=email), "user_details": data})
     except Exception as e:
@@ -198,8 +232,8 @@ def process_login(email, password, ipAddress, ipMetadata, salt_string,index):
         first_name = user_data[1]
         last_name = user_data[2]
         email = user_data[3]
-        encrypted_email = user_data[8]
-        email_iv = user_data[9]
+        type = user_data[9]
+        
        
        # picture =str(io.BytesIO(user_data[6]), mimetype='image/jpeg')
 
@@ -328,9 +362,9 @@ def run_process_b():
 
     try:
         subprocess.run(['python', 'tablica.py', excel_izlazna_putanja, pdf_direktorijum], check=True)
-        return jsonify({'message': 'Proces B je uspješno izvršen.'})
+        return jsonify({'message': 'Sve informacije su uspješno upisane u tablicu.'})
     except subprocess.CalledProcessError as e:
-        return jsonify({'error': f'Greška prilikom izvršavanja Procesa B: {e}'})    
+        return jsonify({'error': f'Greška prilikom obrade podataka: {e}'})    
     
 
 # Select * from users
@@ -345,9 +379,11 @@ def get_users():
 # app.route that show all users in datatable
 @app.route('/api/users', methods=['GET'])
 @cross_origin(origins='http://localhost:3000', methods=['GET'])
+@auth.login_required
 
 def get_all_users():
     users = get_users()
+    
     user_list = []
     for user in users:
         user_dict = {
@@ -405,21 +441,184 @@ def update_user(id):
 
     return jsonify({'message': 'Korisnik s ID-om {} je ažuriran.'.format(id)})
 
+# Inicijalizacija prazne liste logova
+logs = []
+
 # app.route for deleting user by ID
 @app.route('/api/userdelete/<int:id>', methods=['DELETE'])
 @cross_origin(origins='http://localhost:3000', methods=['DELETE'])
+#@jwt_required()
 
 def delete_user(id):
     cursor = db.cursor()
     query = "UPDATE users SET deleted = 1 WHERE id =%s"
     cursor.execute(query, (id,))
+     
+   
     db.commit()
     cursor.close()
+    log_entry = {
+        'user_id': id,
+        'action': 'delete',
+        'timestamp': str(timestamp),
+        'deleted_by': 'ime_korisnika'  # Ovdje dodajte korisničko ime ili ID osobe koja je izbrisala korisnika
+    }
+
+    # Otvorite datoteku za zapisivanje evidencije (append mode)
+    # Dodajte log zapis u listu logova
+    logs.append(log_entry)
+
+    # Otvorite datoteku za zapisivanje evidencije (pisanje cijele liste logova u JSON datoteku)
+    with open('delete_log.json', 'w') as log_file:
+        json.dump(logs, log_file, indent=4)  # Upotrijebite indent za ljepši format JSON datoteke
 
     return jsonify({'message': 'Korisnik s ID-om {} je izbrisan.'.format(id)})
 
+# Funkcija za čitanje korisnika iz XML datoteke
+def read_users(xml_file):
+    try:
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+        users = []
+
+        for user_element in root:
+            user_data = {}
+            for data_element in user_element:
+                user_data[data_element.tag] = data_element.text
+            users.append(user_data)
+
+        return users
+
+    except Exception as e:
+        print("Error reading users:", str(e))
+        return jsonify(error="Error reading users"), 500  # Vratite odgovarajući HTTP status kod za grešku, npr. 500 za internu grešku servera
+
+
+
+@app.route('/api/xmlusers', methods=['GET'])
+@cross_origin(origins='http://localhost:3000', methods=['GET'])
+def get_users1():
+    users = read_users(xml_file)
+    return jsonify(users)
+
+@app.route('/api/xmlusers', methods=['POST'])
+@cross_origin(origins='http://localhost:3000', methods=['POST'])
+
+def create_user():
+    user_data = request.get_json()
+    create_user(xml_file, user_data)
+    return "User created", 201
+
+
+@app.route('/api/xmlusers/update/<int:user_id>', methods=['PUT'])
+@cross_origin(origins='http://localhost:3000', methods=['PUT'])
+def update_users(user_id):
+    updated_data = request.get_json()
+    
+    try:
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+        print("user_id", user_id)
+        user_found = False  # Postavite zastavicu da biste provjerili je li korisnik pronađen
+
+        
+
+
+        for user_element in root:
+            print("user_element", user_element.find('id').text)
+            if user_element.find('id').text == str(user_id):
+                # Ažurirajte podatke korisnika prema poslanim podacima
+               # user_element.find('name').text = updated_data['name']
+                #user_element.find('surname').text = updated_data['surname']
+                user_element.find('email').text = updated_data['email']
+                tree.write(xml_file)  # Spremi promjene u XML datoteku
+                user_found = True
+                break
+        if user_found:
+            return "User updated", 200
+        else:
+            return jsonify(error="User not found"), 404
+        
+        
+
+       
+
+    except Exception as e:
+        print("Error updating user:", str(e))
+        return jsonify(error="Error updating user"), 500
+@app.route('/api/xmlusers/delete/<int:user_id>', methods=['DELETE'])
+
+def delete_users(user_id):
+    try:
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+
+        for user_element in root:
+            # Pronađite korisstr(nika s odgovarajućim ID-om
+            if user_element.find('id').text == str(user_id):
+                root.remove(user_element)
+                tree.write(xml_file)  # Spremi promjene u XML datoteku
+                return "User deleted", 200
+
+    # Ako korisnik s traženim ID-om nije pronađen
+        return jsonify(error="User not found"), 404
+
+    except Exception as e:
+        print("Error deleting user:", str(e))
+        return jsonify(error="Error deleting user"), 500  # Vratite odgovarajući HTTP status kod za grešku, npr. 500 za internu grešku servera
 
    
+
+
+
+############################################################################################JSON
+# Čitanje svih logova iz JSON datoteke
+def read_logs():
+    try:
+        with open('delete_log.json', 'r') as log_file:
+            logs = json.load(log_file)
+    except FileNotFoundError:
+        logs = []
+    return logs
+
+# Uređivanje postojećeg loga na temelju ID-a
+def edit_log(log_id, updated_data):
+    logs = read_logs()
+    for log in logs:
+        if log['user_id'] == log_id:
+            log.update(updated_data)
+            with open('delete_log.json', 'w') as log_file:
+                json.dump(logs, log_file, indent=4)
+            return
+
+# Brisanje loga na temelju ID-a
+def delete_log(log_id):
+    logs = read_logs()
+    logs = [log for log in logs if log['user_id'] != log_id]
+    with open('delete_log.json', 'w') as log_file:
+        json.dump(logs, log_file, indent=4)
+
+# Ruta za čitanje svih logova
+@app.route('/api/logs', methods=['GET'])
+@cross_origin(origins='http://localhost:3000', methods=['GET'])
+def get_logs():
+    logs = read_logs()
+    return jsonify(logs)
+
+# Ruta za uređivanje postojećeg loga
+@app.route('/api/logs/<int:log_id>', methods=['PUT'])
+@cross_origin(origins='http://localhost:3000', methods=['PUT'])
+def update_log(log_id):
+    updated_data = request.get_json()
+    edit_log(log_id, updated_data)
+    return "Log updated", 200
+
+# Ruta za brisanje loga na temelju ID-a
+@app.route('/api/logs/delete/<int:log_id>', methods=['DELETE'])
+@cross_origin(origins='http://localhost:3000', methods=['DELETE'])
+def delete_log_by_id(log_id):
+    delete_log(log_id)
+    return "Log deleted", 200
 
 if __name__ == '__main__':
     app.run(debug=config.getboolean("app","debug"), port=config.getint("app",option="port"))

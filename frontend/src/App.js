@@ -23,8 +23,10 @@ const Tablica = React.lazy(() => import('./views/pages/login/Tablica'))
 const Register = React.lazy(() => import('./views/pages/register/Register'))
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'))
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
-const Kriptiranje = React.lazy(() => import('./views/pages/login/Kriptiranje'))
+const Users = React.lazy(() => import('./views/pages/login/Users'))
 const Edit = React.lazy(() => import('./views/pages/login/Edit'))
+const Contacts = React.lazy(() => import('./views/dashboard/Contacts'))
+const Logs = React.lazy(() => import('./views/dashboard/Logs'))
 
 const App = () => {
   const [lang, setlang] = useState(localStorage["lang"] || "en")
@@ -67,10 +69,12 @@ const App = () => {
       <UserProvider value={user}>
         <LanguageProvider value={get(localization, lang)}>
           <Suspense fallback={loading}>
+            
             <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
               <button onClick={() => {setlang('en'); localStorage.setItem('lang', 'en')}}>en</button>
-              <button onClick={() => {setlang('hr'); localStorage.setItem('lang', 'hr')}}>hr</button>
+              <button style={{ marginRight: '10px' }}  onClick={() => {setlang('hr'); localStorage.setItem('lang', 'hr')}}>hr</button>
             </div>
+            
             <Routes>
               <Route exact path="/login" name="Login Page" element={<Login setUser={setuser} />} />
               <Route
@@ -83,8 +87,10 @@ const App = () => {
               
               <Route exact path="/404" name="Page 404" element={<Page404 />} />
               <Route exact path="/500" name="Page 500" element={<Page500 />} />
-              <Route exact path="/kriptiranje" name="Kriptiranje"  element={isAuthenticated ? <Kriptiranje /> : <Navigate to="/login" replace />} />
+              <Route exact path="/users" name="Users"  element={isAuthenticated ? <Users /> : <Navigate to="/login" replace />} />
               <Route exact path="/edit/:id/edit" name="Edit User" element={<Edit />} />
+              <Route exact path="/contacts" name="Contacts" element={<Contacts />} />
+              <Route exact path="/logs" name="Logs" element={<Logs />} />
 
               <Route path="*" name="Home" element={<DefaultLayout />} />
             </Routes>
@@ -92,6 +98,7 @@ const App = () => {
         </LanguageProvider>
       </UserProvider>
     </HashRouter>
+    
   )
 }
 

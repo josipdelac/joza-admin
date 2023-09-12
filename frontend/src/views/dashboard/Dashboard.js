@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react'
+import { PDFViewer } from '@react-pdf/renderer'
+import TableReport from './TableReport'
+import utf8 from 'utf8';
 
+import Modal from 'react-modal';
 import {
   CAvatar,
   CButton,
@@ -17,6 +21,11 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
+  CModal,
+  CModalBody,
+  CModalFooter,
+  CModalHeader,
+  CModalTitle,
 } from '@coreui/react'
 import { CChartLine } from '@coreui/react-chartjs'
 import { getStyle, hexToRgba } from '@coreui/utils'
@@ -48,12 +57,11 @@ import {
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import { useGetRobotStatus, useGetRobotStatusLastEntry, useGetRobotsStatusLastEntries, useGetProcessedItems } from 'src/api/api'
 import { jsPDF } from "jspdf";
-var jsRTF = require('jsrtf');
+import jsRTF from 'jsrtf';
 import { saveAs } from 'file-saver';
 import LanguageContext from 'src/components/localizationContext'
 import {useNavigate } from 'react-router-dom';
-
-
+import iconv from 'iconv-lite';
 const Dashboard = () => {
   const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
 
@@ -66,13 +74,20 @@ const Dashboard = () => {
   ]
   const [robotEntries, setRobotEntries] = useState([])
   const [last_entry, setlast_entry] = useState([])
-  const [total_processed, setTotalProcessed] = useState({pdf: 0, web:0})
+  const [showPDF, setShowPDF] = useState(false);
+  const [visible, setVisible] = useState(false)
+  
+
+  const [total_processed, setTotalProcessed] = useState({pdf: 0, web:0, K:0})
   const value = useContext(LanguageContext);  
   console.log("Context", value)
-  
+  const generatePDF = () => {
+    setShowPDF(true);
+  };
   useEffect(() => {
     const getResults = async (id) => { 
-      const results = await Promise.all( [useGetRobotsStatusLastEntries(),  useGetRobotStatusLastEntry(id),useGetProcessedItems("pdf"),useGetProcessedItems("web")]);
+      const results = await Promise.all( [useGetRobotsStatusLastEntries(),  useGetRobotStatusLastEntry(id),useGetProcessedItems("pdf"),useGetProcessedItems("web"), useGetProcessedItems("K")]);
+      
      
        return results }
 
@@ -81,11 +96,14 @@ const Dashboard = () => {
       setlast_entry([response[1].data])
     });*/
     const fetchData = async () => {
-      const response = await getResults("ROO");
+      const response = await getResults();
       console.log("lastdsadsada:",response[1])
       setRobotEntries(response[0].data);
+      console.log("setRobotEntries",response[0].data)
       setlast_entry([response[1]]);
-      setTotalProcessed({pdf: response[2].data, web:response[3].data})
+      console.log("setlast_entry",response[1])
+      setTotalProcessed({pdf: response[2].data, web:response[3].data, K:response[4].data, total:response[2].data+response[3].data+response[4].data})
+      
     };
 
     fetchData();
@@ -101,46 +119,40 @@ const Dashboard = () => {
 
   }, [])
 
-  const handlePDF= ()=>{
-    console.log("JSPDF")
-    const doc = new jsPDF();
-    doc.text("Report!", 10, 10);
-    console.log("X:::",robotEntries)
-    robotEntries?.forEach((value,index) => doc.text(JSON.stringify(value), 10, 20+10*index))
-    // for (const x in robotEntries){
-    //   console.log("X:::",x)
-    //   doc.text(str(x), 10, 10);}
-    doc.save("report.pdf");
-  }
-  const handleRTF= ()=>{
-    console.log("JSRTF")
+  const currentDate = new Date().toLocaleDateString();
 
-    var myDoc = new jsRTF();
 
-    // Formatter object
-    var textFormat = new jsRTF.Format({
-        spaceBefore : 300,
-        spaceAfter : 300,
-        paragraph : true,
+
+  const generateRTF = (robotEntries) => {
+    let rtfContent = `{\rtf1
+  {\fonttbl{\f0 Times New Roman;}}
+  {\colortbl;\red0\green0\blue0;\red255\green0\blue0;\red0\green255\blue0;}
+  {\pard\cf1\qc\fs24 Report Title\par}
+  {\pard\qc\fs20\cf0
+  \\trowd\\cellx1440\\cellx2880\\cellx4320\\cellx5760\\cellx7200
+  \\cf2 Robot Name\\cell Status\\cell Progress\\cell Server\\cell Last Updated\\row
+  }`;
+  
+    robotEntries.forEach((item) => {
+      // Encode special characters using iconv-lite
+      const name = iconv.encode(item.name, 'win1252').toString('binary');
+      const status = iconv.encode(item.status, 'win1252').toString('binary');
+      const serverId = iconv.encode(item.server_id, 'win1252').toString('binary');
+      const row = `\\trowd\\cellx1440\\cellx2880\\cellx4320\\cellx5760\\cellx7200
+  \\pard\\qc ${name}\\cell ${status}\\cell ${item.current_item}/${item.total_items}\\cell ${serverId}\\cell ${item.datum}\\row`;
+      rtfContent += row;
     });
-
-    // Adding text styled with formatter
-    myDoc.writeText('Report.', textFormat);
-    console.log("X:::",robotEntries)
-    robotEntries?.forEach((value) => myDoc.writeText(JSON.stringify(value)))
-
-//     for ( x in robotEntr{
-//       console.log("X:::",x)
-
-//       doc.text(str(x), 10, 10);}
-// ies)
-    // Make content...
-    var content = myDoc.createDocument();
-    var blob = new Blob([content], {type: "text/plain;charset=utf-8"});
-    saveAs(blob, "report.rtf");
-
-  }
+  
+    rtfContent += '}';
+  
+    // Create a Blob and save it as an RTF file
+    const blob = new Blob([rtfContent], { type: 'application/rtf' });
+    saveAs(blob, 'report.rtf');
+  };
+  
    const localization= useContext('lo')
+
+  
 
   return (
     <>
@@ -290,8 +302,8 @@ const Dashboard = () => {
                     </CCol>
                     <CCol sm={6}>
                       <div className="border-start border-start-4 border-start-danger py-1 px-3 mb-3">
-                        <div className="text-medium-emphasis small">Total K+ insert processed</div>
-                        <div className="fs-5 fw-semibold">{total_processed.web}</div>
+                        <div className="text-medium-emphasis small">{value.documents_processed_K}</div>
+                        <div className="fs-5 fw-semibold">{total_processed.K}</div>
                       </div>
                     </CCol>
                   </CRow>
@@ -314,14 +326,14 @@ const Dashboard = () => {
                   <CRow>
                     <CCol sm={6}>
                       <div className="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
-                        <div className="text-medium-emphasis small">Total WEB data processed</div>
-                        <div className="fs-5 fw-semibold">78,623</div>
+                        <div className="text-medium-emphasis small">{value.documents_processed_web}</div>
+                        <div className="fs-5 fw-semibold">{total_processed.web}</div>
                       </div>
                     </CCol>
                     <CCol sm={6}>
                       <div className="border-start border-start-4 border-start-success py-1 px-3 mb-3">
                         <div className="text-medium-emphasis small">Organic</div>
-                        <div className="fs-5 fw-semibold">49,123</div>
+                        <div className="fs-5 fw-semibold">{total_processed.total}</div>
                       </div>
                     </CCol>
                   </CRow>
@@ -384,7 +396,7 @@ const Dashboard = () => {
                                            
                       <CTableDataCell>
                        
-                        <CProgress  thin color={item} value={item.current_item*1} />
+                       <CProgress  thin color="blue" value={item.current_item*1} />
                       </CTableDataCell>
                       {/* <CTableDataCell className="text-center">
                         <CIcon size="xl" icon={item.payment.icon} />
@@ -414,8 +426,27 @@ const Dashboard = () => {
                   ))}
                 </CTableBody>
               </CTable>
-              <CButton onClick= {()=>handlePDF()}>PDF</CButton>
-              <CButton onClick= {() => handleRTF()}>RTF</CButton>
+              <br/>
+        
+              <CButton style={{ marginRight: '10px' }} onClick={() => setVisible(!visible)}>PDF</CButton>
+              <CModal visible={visible} onClose={() => setVisible(false)} style={{ width: '850px', height: '700px' }}>
+                <CModalHeader onClose={() => setVisible(false)}>
+                  <CModalTitle>Robot's Report</CModalTitle>
+                </CModalHeader>
+                <CModalBody>
+                  <PDFViewer width="800" height="600">
+                      <TableReport robotEntries={robotEntries} />
+                  </PDFViewer>
+                </CModalBody>
+                <CModalFooter>
+                  <CButton color="primary" onClick={() => setVisible(false)}>
+                    Close
+                  </CButton>
+                  
+                </CModalFooter>
+              </CModal>
+             
+              <CButton  onClick= {() => generateRTF(robotEntries)}>RTF</CButton>
 
             </CCardBody>
           </CCard>

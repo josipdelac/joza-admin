@@ -1,7 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios" //npm install axios --save 
 import {Link} from 'react-router-dom';
+import {
+    CButton,
+    CCol,
+    CContainer,
+    CFormInput,
+    CInputGroup,
+    CInputGroupText,
+    CRow,
+    CAlert,
+    CCard,
+    CCardBody,
+    CCardGroup,
+    CForm,
+  } from '@coreui/react'
+  import CIcon from '@coreui/icons-react'
+  import { cilFile, cilFolderOpen, cilLockLocked, cilUser } from '@coreui/icons'
   
+  import { cilMagnifyingGlass } from '@coreui/icons'
+  
+  import { AppFooter, AppHeader,AppSidebar, AppBreadcrumb } from 'src/components';
+
+
 export default function ListUserPage(){
   
     const [users, setUsers] = useState([]);
@@ -26,12 +47,13 @@ export default function ListUserPage(){
      
     return (
     <div>
+        <AppHeader />
         <div className="container h-100">
             <div className="row h-100">
                 <div className="col-12">
                     
                     <h1>List Users</h1>
-                    <table class="table table-bordered table-striped">
+                    <table className="table table-bordered table-striped">
                         <thead>
                             <tr>
                                 <th>#</th>

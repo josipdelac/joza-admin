@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import { Link } from 'react-router-dom'
 import {
   CButton,
@@ -17,6 +17,9 @@ import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 import axios from 'axios'
 import {useNavigate } from 'react-router-dom';
+import LanguageContext from 'src/components/localizationContext'
+
+
 
 
 function Login(props) {
@@ -24,6 +27,8 @@ function Login(props) {
   const [password, setPassword] = useState('');
   const [ipAddress, setIPAddress] = useState('');
   const navigate = useNavigate();
+  const value = useContext(LanguageContext);  
+  console.log("Context", value)
  // const navigate = useNavigate();
   const {setUser} = props;
   const handleLogin = async () => {
@@ -59,6 +64,7 @@ function Login(props) {
         .catch(error => console.log(error))
     }, []);
   
+    const localization= useContext('lo')
 
   
 
@@ -71,8 +77,8 @@ function Login(props) {
               <CCard className="p-4">
                 <CCardBody>
                   <CForm>
-                    <h1>Login</h1>
-                    <p className="text-medium-emphasis">Sign In to your account</p>
+                    <h1>{value.login}</h1>
+                    <p className="text-medium-emphasis">{value.signin}</p>
                     <CInputGroup className="mb-3">
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
@@ -87,14 +93,14 @@ function Login(props) {
                       <CFormInput
                         type="password"
                         value={password}
-                        placeholder="HEHHEHEH"
+                        placeholder="password"
                         onChange={(e) => setPassword(e.target.value)}
                       />
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
                         <CButton onClick={handleLogin} color="primary" className="px-4">
-                          Login
+                          {value.loginbutton}
                         </CButton>
                       </CCol>
                       <CCol xs={6} className="text-right">
@@ -109,7 +115,7 @@ function Login(props) {
               <CCard className="text-white bg-primary py-5" style={{ width: '44%' }}>
                 <CCardBody className="text-center">
                   <div>
-                    <h2>Sign up</h2>
+                    <h2>{value.register}</h2>
                     <p>
                     Embark on your journey with us! 🌟 Create an account today and join our vibrant community. 
                     Let's unlock a world of possibilities together. Click here to register and be a part of something extraordinary.

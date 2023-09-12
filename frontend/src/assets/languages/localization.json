@@ -1,9 +1,28 @@
 {
     "en":{
-        "documents_processed": "Total documents processed"
+        "documents_processed": "Total documents processed",
+        "documents_processed_web": "Total WEB data processed",
+        "documents_processed_K": "Total K+ insert processed",
+        "login": "Login",
+        "signin":"Sign In to your account",
+        "loginbutton":"Login",
+        "register":"Register now"
+
+        
+
     },
     "hr":{
-        "documents_processed": "Ukupni broj obradenih dokumenata."
+        "documents_processed": "Ukupni broj obrađenih dokumenata.",
+        "documents_processed_web": "Ukupan broj WEB podataka obrađenih",
+        "documents_processed_K": "Ukupan broj K+ podataka obrađenih",
+        "login": "Prijavi se",
+        "signin":"Prijavi se na svoj račun",
+        "loginbutton":"Prijavi se",
+        "register":"Registrirajte se"
+        
+
+
+
     }
 
 }
