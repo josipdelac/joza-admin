@@ -1,5 +1,7 @@
 import axios from 'axios'
 import CryptoJS from 'crypto-js'
+import { useNavigate } from 'react-router-dom';
+
 
 const API_URL = 'http://127.0.0.1:8001'
 const APP_URL = 'http://127.0.0.1:5000'
@@ -69,3 +71,16 @@ export const useGetRobotsStatusLastEntries = async () => {
   const result = await axios.get(`${API_URL}/last_entries/`, config)
   return result
 }
+
+export const fetchData = async () => {
+  const token = localStorage['token'] || ''
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+  const result = await axios.get(`${APP_URL}/api/users`, config)
+  return result
+}
+
+

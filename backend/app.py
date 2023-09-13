@@ -21,7 +21,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 from io import BytesIO
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt, verify_jwt_in_request
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
@@ -33,16 +33,17 @@ import secrets
 import xml.etree.ElementTree as ET
 from flask_basicauth import BasicAuth
 from flask_httpauth import HTTPBasicAuth
-
+from functools import wraps
+from datetime import timedelta
 
 
 
 
 app = Flask(__name__)
-auth = HTTPBasicAuth()
 
 
 app.config["JWT_SECRET_KEY"] = "super-jaki-key" 
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=50)
 jwt = JWTManager(app)
 CORS(app, resources={r"/api/*": {"origins": "*", "methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS"}})
 # Get the current timestamp
@@ -69,7 +70,22 @@ def get_db():
     password="",
     database="uiapp"
     )
-    
+
+def admin_required():
+    def wrapper(fn):
+        @wraps(fn)
+        def decorator(*args, **kwargs):
+            verify_jwt_in_request()
+            claims = get_jwt()
+            print("test:", claims)
+            if claims["is_administrator"]:
+                return fn(*args, **kwargs)
+            else:
+                return jsonify(msg="Samo Admin!"), 403
+
+        return decorator
+
+    return wrapper    
 
 
 
@@ -179,6 +195,7 @@ def register():
         cursor.execute(query, (first_name, last_name, email, country, hashed_password, profile_image_data))
         db.commit()
         cursor.close()
+        user_id
         
        
 
@@ -232,7 +249,7 @@ def process_login(email, password, ipAddress, ipMetadata, salt_string,index):
         first_name = user_data[1]
         last_name = user_data[2]
         email = user_data[3]
-        type = user_data[9]
+        type = user_data[8]
         
        
        # picture =str(io.BytesIO(user_data[6]), mimetype='image/jpeg')
@@ -259,7 +276,7 @@ def process_login(email, password, ipAddress, ipMetadata, salt_string,index):
                 test=cursor.execute(query, (user_id, country, city, encrypted_ipAddress, iv, timezone))
                 blabla=db.commit()
                 print("Test",test,blabla)
-                return_value= (True,{"first_name":first_name,"last_name":last_name,"email":email})
+                return_value= (True,{"first_name":first_name,"last_name":last_name,"email":email, "admin": type== 'admin'})
                 break
 
     # cursor.reset()
@@ -291,7 +308,7 @@ def login_route():
 
     for x in results:
         if(x.result()[1][0]):
-            return jsonify({'message': 'User logged in successfully', "jwt": create_access_token(identity=email,expires_delta=False ), "user_details": x.result()[1][1]}) 
+            return jsonify({'message': 'User logged in successfully', "jwt": create_access_token(identity=email,expires_delta=False, additional_claims={"is_administrator": x.result()[1][1]["admin"]} ), "user_details": x.result()[1][1]}) 
    
     return jsonify({'message': 'Error logging in user'})
 
@@ -356,6 +373,11 @@ def get_ip(ip):
 @cross_origin(origins='http://localhost:3000', methods=['POST'])
 def run_process_b():
     data = request.get_json()
+    claims = get_jwt()
+    print("test:", claims)
+    if not claims["is_administrator"]:
+        return jsonify(msg="Samo Admin!"), 403
+
     excel_izlazna_putanja = data.get('excel_izlazna_putanja')
     pdf_direktorijum = data.get('pdf_direktorijum')
     print("TUUU SAAM")
@@ -379,9 +401,9 @@ def get_users():
 # app.route that show all users in datatable
 @app.route('/api/users', methods=['GET'])
 @cross_origin(origins='http://localhost:3000', methods=['GET'])
-@auth.login_required
-
+@jwt_required()
 def get_all_users():
+  
     users = get_users()
     
     user_list = []

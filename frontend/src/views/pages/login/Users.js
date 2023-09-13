@@ -15,19 +15,24 @@ import {
     CCardGroup,
     CForm,
   } from '@coreui/react'
-  import CIcon from '@coreui/icons-react'
-  import { cilFile, cilFolderOpen, cilLockLocked, cilUser } from '@coreui/icons'
+import CIcon from '@coreui/icons-react'
+import { cilFile, cilFolderOpen, cilLockLocked, cilUser } from '@coreui/icons'
   
-  import { cilMagnifyingGlass } from '@coreui/icons'
+import { cilMagnifyingGlass } from '@coreui/icons'
   
-  import { AppFooter, AppHeader,AppSidebar, AppBreadcrumb } from 'src/components';
+import { AppFooter, AppHeader,AppSidebar, AppBreadcrumb } from 'src/components';
+import { fetchData } from 'src/api/api';
 
 
 export default function ListUserPage(){
   
     const [users, setUsers] = useState([]);
     useEffect(() => {
+        fetchData();
         getUsers();
+        
+       
+
     }, []);
   
     function getUsers() {
@@ -36,6 +41,7 @@ export default function ListUserPage(){
             setUsers(response.data);
         });
     }
+    
      
     const deleteUser = (id) => {
         axios.delete(`http://localhost:5000/api/userdelete/${id}`).then(function(response){
