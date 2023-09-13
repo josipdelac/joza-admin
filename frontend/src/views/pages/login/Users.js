@@ -27,21 +27,26 @@ import { fetchData } from 'src/api/api';
 export default function ListUserPage(){
   
     const [users, setUsers] = useState([]);
-    useEffect(() => {
-        fetchData();
-        getUsers();
-        
-       
 
-    }, []);
-  
-    function getUsers() {
-        axios.get('http://localhost:5000/api/users').then(function(response) {
-            console.log(response.data);
-            setUsers(response.data);
-        });
-    }
+
+
+
+
+    useEffect(() => {
+        const getResults = async (id) => { 
+          const results = await fetchData()
+            setUsers(results.data)
+         
+           return results }
     
+        getResults();
+    
+        
+      
+    
+      }, [])
+ 
+
      
     const deleteUser = (id) => {
         axios.delete(`http://localhost:5000/api/userdelete/${id}`).then(function(response){
