@@ -290,7 +290,7 @@ const Dashboard = () => {
       <CRow>
         <CCol xs>
           <CCard className="mb-4">
-            <CCardHeader>Tottal statistic</CCardHeader>
+            <CCardHeader>{value.totalstatistics}</CCardHeader>
             <CCardBody>
               <CRow>
                 <CCol xs={12} md={6} xl={6}>
@@ -333,7 +333,7 @@ const Dashboard = () => {
                     </CCol>
                     <CCol sm={6}>
                       <div className="border-start border-start-4 border-start-success py-1 px-3 mb-3">
-                        <div className="text-medium-emphasis small">Organic</div>
+                        <div className="text-medium-emphasis small">{value.total}</div>
                         <div className="fs-5 fw-semibold">{total_processed.total}</div>
                       </div>
                     </CCol>
@@ -384,10 +384,10 @@ const Dashboard = () => {
                     </CTableHeaderCell>
                     <CTableHeaderCell className="text-center">Robot</CTableHeaderCell>
                     <CTableHeaderCell className="text-center">Satus</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Progress</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">{value.progress}</CTableHeaderCell>
                     <CTableHeaderCell className="text-center">Server</CTableHeaderCell>
                     {/* <CTableHeaderCell className="text-center">Payment Method</CTableHeaderCell> */}
-                    <CTableHeaderCell className="text-center">Last updated</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">{value.lastupdate}</CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>

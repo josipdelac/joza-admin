@@ -2,7 +2,7 @@
   defer
   src="https://polyfill.io/v3/polyfill.min.js?features=String.prototype.padEnd|always"
 ></script>
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect,useContext } from 'react'
 import { Link } from 'react-router-dom'
 import {
   CButton,
@@ -22,6 +22,8 @@ import { cilLockLocked, cilUser } from '@coreui/icons'
 import axios from 'axios'
 import { convert } from 'xml2js' // xml2js library for converting XML to JSON
 import { useNavigate } from 'react-router-dom'
+import LanguageContext from 'src/components/localizationContext'
+
 
 const Register = (props) => {
   const [firstName, setFirstName] = useState('')
@@ -33,6 +35,10 @@ const Register = (props) => {
   const [profileImage, setProfileImage] = useState(null)
   const navigate = useNavigate()
   const { setUser } = props
+  const value = useContext(LanguageContext);  
+  
+
+
 
   const handleImageChange = (e) => {
     const imageFile = e.target.files[0]
@@ -100,6 +106,7 @@ const Register = (props) => {
       console.error('Error:', error)
     }
   }
+  const localization= useContext('lo')
 
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
@@ -109,8 +116,8 @@ const Register = (props) => {
             <CCard className="mx-4">
               <CCardBody className="p-4">
                 <CForm>
-                  <h1>Register</h1>
-                  <p className="text-medium-emphasis">Create your account</p>
+                  <h1>{value.registertext}</h1>
+                  <p className="text-medium-emphasis">{value.registerparagraf}</p>
                   <CInputGroup className="mb-3">
                     <CInputGroupText>
                       <CIcon icon={cilUser} />

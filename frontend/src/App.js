@@ -27,6 +27,7 @@ const Users = React.lazy(() => import('./views/pages/login/Users'))
 const Edit = React.lazy(() => import('./views/pages/login/Edit'))
 const Contacts = React.lazy(() => import('./views/dashboard/Contacts'))
 const Logs = React.lazy(() => import('./views/dashboard/Logs'))
+const Robots = React.lazy(() => import('./views/dashboard/Robots'))
 
 const App = () => {
   const [lang, setlang] = useState(localStorage["lang"] || "en")
@@ -88,11 +89,12 @@ const App = () => {
               <Route exact path="/404" name="Page 404" element={<Page404 />} />
               <Route exact path="/500" name="Page 500" element={<Page500 />} />
               <Route exact path="/users" name="Users"  element={isAuthenticated ? <Users /> : <Navigate to="/login" replace />} />
-              <Route exact path="/edit/:id/edit" name="Edit User" element={<Edit />} />
-              <Route exact path="/contacts" name="Contacts" element={<Contacts />} />
-              <Route exact path="/logs" name="Logs" element={<Logs />} />
+              <Route exact path="/edit/:id/edit" name="Edit User" element={isAuthenticated ?<Edit />:<Navigate to="/login" replace />} />
+              <Route exact path="/contacts" name="Contacts" element={isAuthenticated ?<Contacts />:<Navigate to="/login" replace />} />
+              <Route exact path="/logs" name="Logs" element={isAuthenticated ?<Logs />:<Navigate to="/login" replace />} />
+              <Route exact path="/robots" name="Robots" element={isAuthenticated ?<Robots />:<Navigate to="/login" replace />} />
 
-              <Route path="*" name="Home" element={<DefaultLayout />} />
+              <Route path="*" name="Home" element={isAuthenticated ? <DefaultLayout />:<Navigate to="/login" replace />} />
             </Routes>
             
           </Suspense>

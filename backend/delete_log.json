@@ -1,16 +1,20 @@
 [
     {
-        "user_id": 6,
-        "action": "update",
-        "timestamp": "2023-09-13 13:46:35",
-        "deleted_by": "ime_korisnika",
-        "id": 6
+        "user_id": 4,
+        "action": "delete",
+        "timestamp": "2023-09-13 22:30:35",
+        "deleted_by": "ime_korisnika"
     },
     {
-        "user_id": 4,
-        "action": "test",
-        "timestamp": "2023-09-13 12:36:35",
-        "deleted_by": "ime_korisnika",
-        "id": 4
+        "user_id": 3,
+        "action": "delete",
+        "timestamp": "2023-09-13 22:30:35",
+        "deleted_by": "ime_korisnika"
+    },
+    {
+        "user_id": 2,
+        "action": "delete",
+        "timestamp": "2023-09-13 22:30:35",
+        "deleted_by": "ime_korisnika"
     }
 ]

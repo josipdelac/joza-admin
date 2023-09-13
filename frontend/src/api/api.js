@@ -77,10 +77,49 @@ export const fetchData = async () => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
+      'authorization': "Bearer " + localStorage['token'],
     },
   }
-  const result = await axios.get(`${APP_URL}/api/users`, config)
-  return result
+  try {
+    const result = await axios.get(`${APP_URL}/api/users`, config);
+    return result;
+  } catch (error) {
+    if (error.response && error.response.status === 403) {
+      
+      alert('Zabranjen pristup! Nemate ovlasti za pristup ovom resursu.');
+      window.location.href = "/#/login";
+
+    } else {
+      
+      console.error('Greška pri dohvaćanju podataka:', error);
+    }
+    
+  }
 }
 
 
+export const fetchDataRobots = async () => {
+  const token = localStorage['token'] || ''
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+  try {
+    const result = await axios.get(`${APP_URL}/api/robots`, config);
+    return result;
+  } catch (error) {
+    if (error.response && error.response.status === 403) {
+      
+      alert('Zabranjen pristup! Nemate ovlasti za pristup ovom resursu.');
+      
+      
+    } else {
+      
+      console.error('Greška pri dohvaćanju podataka:', error);
+    }
+    
+   console.error;
+    
+  }
+}

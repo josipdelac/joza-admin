@@ -6,7 +6,45 @@
         "login": "Login",
         "signin":"Sign In to your account",
         "loginbutton":"Login",
-        "register":"Register now"
+        "register":"Register now",
+        "total":"Total",
+        "registerbutton":"Register",
+        "logintext":"Embark on your journey with us! 🌟 Create an account today and join our vibrant community. Let's unlock a world of possibilities together. Click here to register and be a part of something extraordinary.",
+        "registertext":"Register",
+        "registerparagraf":"Create your account",
+        "progress":"Progress",
+        "lastupdate":"Last update",
+        "totalstatistics":"Total statistic",
+        "listusers":"List of users",
+        "firstname":"First name",
+        "lastname":"Last name",
+        "email":"Email",
+        "country":"Country",
+        "typeofuser":"Type of user",
+        "department":"Department",
+        "sector":"Sector",
+        "actions":"Actions",
+        "edit":"Edit",
+        "delete":"Delete",
+        "listrobots":"List of robots",
+        "robotname":"Robot name",
+        "status":"Status",
+        "developby":"Developed by",
+        "hzmotable":"HZMO table",
+        "hzmodata":"HZMO data extraction from pdf to .xlsx file",
+        "excelpath":"Excel path",
+        "pdfdirectory":"PDF directory",
+        "startprocess":"Start process",
+        "updateuser":"Update user",
+        "deleteuser":"Delete user",
+        "users":"Users",
+        "logmanagment":"Log managment",
+        "log":"Logs"
+        
+        
+        
+    
+
 
         
 
@@ -18,7 +56,44 @@
         "login": "Prijavi se",
         "signin":"Prijavi se na svoj račun",
         "loginbutton":"Prijavi se",
-        "register":"Registrirajte se"
+        "register":"Registrirajte se",
+        "total":"Ukupno",
+        "registerbutton":"Registrirajte se",
+        "logintext":"Otkrijte svoju avanturu sa nama! 🌟 Kreirajte račun i budi dio nećeg spektakularnog!",
+        "registertext":"Registracija",
+        "registerparagraf":"Kreirajte svoj račun",
+        "progress":"Tijek",
+        "lastupdate":"Zadnje ažurirano",
+        "totalstatistics":"Ukupna statistika",
+        "listusers":"Lista korisnika",
+        "firstname":"Ime",
+        "lastname":"Prezime",
+        "email":"Email",
+        "country":"Država",
+        "typeofuser":"Vrsta korisnika",
+        "department":"Odjel",
+        "sector":"Sektor",
+        "actions":"Akcije",
+        "edit":"Uredi",
+        "delete":"Obriši",
+        "listrobots":"Lista robota",
+        "robotname":"Ime robota",
+        "status":"Stanje",
+        "developby":"Developer",
+        "hzmotable":"HZMO tablica",
+        "hzmodata":"HZMO podaci iz pdf-a u .xlsx formatu",
+        "excelpath":"Excel putanja",
+        "pdfdirectory":"PDF direktorij",
+        "startprocess":"Pokreni proces",
+        "updateuser":"Ažuriraj korisnika",
+        "deleteuser":"Obriši korisnika",
+        "users":"Korisnici",
+        "logmanagment":"Upravljanje logovima",
+        "log":"Logovi"
+        
+
+        
+        
         
 
 

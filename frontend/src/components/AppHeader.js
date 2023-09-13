@@ -12,21 +12,21 @@ import {
   CNavItem,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilBell, cilEnvelopeOpen, cilList, cilMenu } from '@coreui/icons'
+import { cilAccountLogout, cilBell, cilEnvelopeOpen, cilList, cilMenu } from '@coreui/icons'
 
 import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
 import { logo } from 'src/assets/brand/logo'
-import { connect } from 'react-redux';
-
-
-
-
-
 
 const AppHeader = () => {
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+   
+    window.location.href = "/#/login";
+  };
 
   return (
     <CHeader position="sticky" className="mb-4">
@@ -50,27 +50,27 @@ const AppHeader = () => {
             <CNavLink href="#/users">Users</CNavLink>
           </CNavItem>
           <CNavItem>
-            <CNavLink href="#/users">Robots</CNavLink>
+            <CNavLink href="#/robots">Robots</CNavLink>
           </CNavItem>
           <CNavItem>
             <CNavLink href="#/tablica">HZMO table</CNavLink>
           </CNavItem>
+          <CNavItem>
+            <CNavLink href="#/contacts">Contacts</CNavLink>
+          </CNavItem>
+          <CNavItem>
+            <CNavLink href="#/logs">Logs</CNavLink>
+          </CNavItem>
         </CHeaderNav>
         <CHeaderNav>
           <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilBell} size="lg" />
+            
+            <CNavLink  onClick={handleLogout}>
+            <button>
+              <CIcon icon={cilAccountLogout} size="lg" />
+            </button>
             </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilList} size="lg" />
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilEnvelopeOpen} size="lg" />
-            </CNavLink>
+            
           </CNavItem>
         </CHeaderNav>
         <CHeaderNav className="ms-3">

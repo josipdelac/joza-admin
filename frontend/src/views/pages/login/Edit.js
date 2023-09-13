@@ -64,7 +64,11 @@ export default function EditUser(){
                 <div className="mb-3">
                   <label>Country</label>
                   <input type="text" value={inputs.country} className="form-control" name="country" onChange={handleChange} />
-                </div>    
+                </div>
+                <div className="mb-3">
+                  <label>Type of user</label>
+                  <input type="text" value={inputs.type} className="form-control" name="country" onChange={handleChange} />
+                </div>        
                 <button type="submit" name="update" className="btn btn-primary">Save</button>
             </form>
             </div>

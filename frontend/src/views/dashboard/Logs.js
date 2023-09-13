@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { AppFooter, AppHeader,AppSidebar, AppBreadcrumb } from 'src/components';
+import {useNavigate } from 'react-router-dom';
+import LanguageContext from 'src/components/localizationContext'
 
 function Logs() {
   const [logs, setLogs] = useState([]);
   const [updateLogData, setUpdateLogData] = useState({});
   const [deleteLogId, setDeleteLogId] = useState(null);
+  const value = useContext(LanguageContext);  
+
 
   useEffect(() => {
     getLogs();
@@ -45,14 +50,15 @@ function Logs() {
 
   return (
     <div>
-      <h2>Log Management</h2>
+      <AppHeader />
+      <h2>{value.logmanagment}</h2>
 
   
       
 
       {/* Dodajte listu logova */}
       <div>
-        <h3>Logs</h3>
+        <h3>{value.log}</h3>
         <ul>
         {logs.map((log) => (
             <li key={log.user_id}>

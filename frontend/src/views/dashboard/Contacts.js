@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import {Link} from 'react-router-dom';
 import {
@@ -21,11 +21,14 @@ import {
   import { cilMagnifyingGlass } from '@coreui/icons'
   
   import { AppFooter, AppHeader,AppSidebar, AppBreadcrumb } from 'src/components';
+  import LanguageContext from 'src/components/localizationContext'
 
 function App() {
   const [users, setUsers] = useState([]);
   const [updateUserId, setUpdateUser] = useState({ id: '', email: '' });
   const [deleteUserId, setDeleteUserId] = useState('');
+  const value = useContext(LanguageContext);  
+
 
   useEffect(() => {
     getUsers1();
@@ -68,7 +71,7 @@ function App() {
       
 
       <div>
-        <h2>Update User</h2>
+        <h2>{value.updateuser}</h2>
         <input
           type="text"
           placeholder="User ID"
@@ -81,22 +84,22 @@ function App() {
           value={updateUserId.email}
           onChange={(e) => setUpdateUser({ ...updateUserId, email: e.target.value })}
         />
-        <button onClick={updateUser}>Update User</button>
+        <button onClick={updateUser}>{value.updateuser}</button>
       </div>
 
       <div>
-        <h2>Delete User</h2>
+        <h2>{value.deleteuser}</h2>
         <input
           type="text"
           placeholder="User ID"
           value={deleteUserId}
           onChange={(e) => setDeleteUserId(e.target.value)}
         />
-        <button onClick={deleteUser}>Delete User</button>
+        <button onClick={deleteUser}>{value.deleteuser}</button>
       </div>
 
       <div>
-        <h2>Users</h2>
+        <h2>{value.users}</h2>
         <pre>{JSON.stringify(users, null, 2)}</pre>
       </div>
     </div>

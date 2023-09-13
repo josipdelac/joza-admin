@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import {
   CAvatar,
   CBadge,
@@ -21,20 +21,17 @@ import {
   cilUser,
 } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import { get } from 'lodash'
-const loading = (
-  <div className="pt-3 text-center">
-    <div className="sk-spinner sk-spinner-pulse"></div>
-  </div>
-)
+
+
 
 import avatar8 from './../../assets/images/avatars/8.jpg'
 
 const AppHeaderDropdown = () => {
+  
   return (
     <CDropdown variant="nav-item">
-      <LanguageProvider value={get(localization,lang)}>
-      <Suspense fallback={loading}>
+      
+      
       <CDropdownToggle placement="bottom-end" className="py-0" caret={false}>
         
       </CDropdownToggle>
@@ -106,8 +103,7 @@ const AppHeaderDropdown = () => {
           Lock Account
         </CDropdownItem>
       </CDropdownMenu>
-      </Suspense>
-      </LanguageProvider>
+      
     </CDropdown>
   )
 }

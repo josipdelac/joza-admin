@@ -28,7 +28,7 @@ function Login(props) {
   const [ipAddress, setIPAddress] = useState('');
   const navigate = useNavigate();
   const value = useContext(LanguageContext);  
-  console.log("Context", value)
+  //console.log("Context", value)
  // const navigate = useNavigate();
   const {setUser} = props;
   const handleLogin = async () => {
@@ -105,7 +105,7 @@ function Login(props) {
                       </CCol>
                       <CCol xs={6} className="text-right">
                         <CButton color="link" className="px-0">
-                          Forgot password?
+                          
                         </CButton>
                       </CCol>
                     </CRow>
@@ -117,15 +117,14 @@ function Login(props) {
                   <div>
                     <h2>{value.register}</h2>
                     <p>
-                    Embark on your journey with us! 🌟 Create an account today and join our vibrant community. 
-                    Let's unlock a world of possibilities together. Click here to register and be a part of something extraordinary.
+                    {value.logintext}
                     </p>
                     <div>
                       <h1>Your IP Address is: {ipAddress}</h1>
                     </div>
                     <Link to="/register">
                       <CButton color="primary" className="mt-3" active tabIndex={-1}>
-                        Register Now!
+                        {value.registerbutton}
                       </CButton>
                     </Link>
                   </div>
