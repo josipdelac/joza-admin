@@ -1,4 +1,5 @@
 from asyncio import wait
+from functools import wraps
 import random
 import traceback
 from flask import Flask, request, jsonify, send_file
@@ -70,7 +71,6 @@ def get_db():
     password="",
     database="uiapp"
     )
-
 def admin_required():
     def wrapper(fn):
         @wraps(fn)
@@ -87,6 +87,9 @@ def admin_required():
 
     return wrapper    
 
+        return decorator
+
+    return wrapper
 
 
 
@@ -196,7 +199,6 @@ def register():
         db.commit()
         cursor.close()
         user_id
-        
        
 
         # Kreirajte podatke o korisniku kao pod-elemente
@@ -371,6 +373,7 @@ def get_ip(ip):
 
 @app.route('/api/tablice', methods=['POST'])
 @cross_origin(origins='http://localhost:3000', methods=['POST'])
+@admin_required()
 def run_process_b():
     data = request.get_json()
     claims = get_jwt()
