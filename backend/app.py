@@ -401,7 +401,8 @@ def get_users():
 # app.route that show all users in datatable
 @app.route('/api/users', methods=['GET'])
 @cross_origin(origins='http://localhost:3000', methods=['GET'])
-@jwt_required()
+@admin_required()
+
 def get_all_users():
   
     users = get_users()

@@ -2,7 +2,7 @@ import React, { Component, Suspense, useState, useEffect } from 'react'
 import { HashRouter, Route, Routes, useHistory, Navigate, redirect } from 'react-router-dom'
 import './scss/style.scss'
 import localization from './assets/languages/localization.json'
-import Select from 'react-select'
+
 import { LanguageProvider } from './components/localizationContext'
 import { get } from 'lodash'
 import { UserProvider } from './components/userContext'
@@ -94,6 +94,7 @@ const App = () => {
 
               <Route path="*" name="Home" element={<DefaultLayout />} />
             </Routes>
+            
           </Suspense>
         </LanguageProvider>
       </UserProvider>

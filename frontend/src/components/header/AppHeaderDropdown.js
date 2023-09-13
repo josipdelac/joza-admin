@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'
+import React from 'react'
 import {
   CAvatar,
   CBadge,
@@ -21,17 +21,20 @@ import {
   cilUser,
 } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
+import { get } from 'lodash'
+const loading = (
+  <div className="pt-3 text-center">
+    <div className="sk-spinner sk-spinner-pulse"></div>
+  </div>
+)
 
 import avatar8 from './../../assets/images/avatars/8.jpg'
-import UserContext from '../userContext'
 
 const AppHeaderDropdown = () => {
-  const userData= useContext(UserContext)
-  console.log("userData",userData)
-  
- 
-    return (
+  return (
     <CDropdown variant="nav-item">
+      <LanguageProvider value={get(localization,lang)}>
+      <Suspense fallback={loading}>
       <CDropdownToggle placement="bottom-end" className="py-0" caret={false}>
         
       </CDropdownToggle>
@@ -65,6 +68,15 @@ const AppHeaderDropdown = () => {
             42
           </CBadge>
         </CDropdownItem>
+        <CDropdownHeader className="bg-light fw-semibold py-2">Language</CDropdownHeader>
+        <CDropdownItem onClick={()=> setlang('en')}>
+          <CIcon icon={cilUser} className="me-2" />
+          EN
+        </CDropdownItem>
+        <CDropdownItem href="#"onClick={()=> setlang('en')} >
+          <CIcon icon={cilSettings} className="me-2" />
+         HR
+        </CDropdownItem>
         <CDropdownHeader className="bg-light fw-semibold py-2">Settings</CDropdownHeader>
         <CDropdownItem href="#">
           <CIcon icon={cilUser} className="me-2" />
@@ -94,6 +106,8 @@ const AppHeaderDropdown = () => {
           Lock Account
         </CDropdownItem>
       </CDropdownMenu>
+      </Suspense>
+      </LanguageProvider>
     </CDropdown>
   )
 }
