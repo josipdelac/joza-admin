@@ -1,2 +1,56 @@
 Dodana je baza tu pod nazivom world_db.zip
 
+
+Zadatak 1. (8)
+
+Kreirajte API endpoint koji će služiti za dohvat svih država iz world baze podataka. Opis API endpointa:
+
+GET /countries - dohvat detalja o svim državama
+
+Podaci o državama koje endpoint vraća trebaju sadržavati vrijednosti za naziv države, površinu i glavni grad u JSON strukturi.
+
+
+Zadatak 2. (8)
+
+Kreirajte API endpoint koji će služiti za dohvat gradova iz world baze podataka. Opis API endpointa:
+
+GET /cities/{id} - dohvat detalja o pojedinom gradu prema id polju
+
+Podaci o gradu u endpointu trebaju sadržavati ime grada i broj stanovnika u JSON strukturi.
+
+
+Zadatak 3. (5)
+
+U jedan od endpointa iz zadatka 1 ili 2 je potrebno dodati sigurnosnu metodu predefiniranog API ključa parametara:
+
+api_kljuc => 123456789
+
+Ukoliko API ključ nije valjan, korisniku je potrebno vratiti grešku “Krivi API ključ”
+
+
+Zadatak 4. (7)
+
+Unutar World baze podataka kreirajte novu tablicu test koja će sadržavati polja id, naziv i opis. 
+
+Kreirajte novi API endpoint koji će služiti za kreiranje novog zapisa u bazi unutar navedene tablice. Endpoint treba koristiti HTTP POST metodu. Opis API endpointa:
+
+POST /test - kreiranje novog zapisa
+
+POST metodom se u JSON strukturi podataka u tijelu zahtjeva šalju naziv i opis, dok se ID u bazu dodaje automatski (auto increment).
+
+Navedeni endpoint treba nakon kreiranog zapisa u bazi kao odgovor vratiti klijentu ID broj.
+
+
+Zadatak 5. (7)
+
+Kreirajte novi API endpoint koji će služiti za brisanje test zapisa u bazi. Endpoint treba koristiti HTTP DELETE metodu. Opis API endpointa:
+
+DELETE   /test/{id} - brisanje zapisa u bazi
+
+Nakon obrisanog zapisa u bazi, vratiti klijentu status “OK”.
+
+
+
+
+
+Prema zadacima napraviti programsko rješenje i uploadati arhivu (zip, rar ili sl.)  na Merlin.
